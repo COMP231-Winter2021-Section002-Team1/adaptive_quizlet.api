@@ -3,5 +3,5 @@
 ## Using Jinja2 framework for backend development https://jinja.palletsprojects.com/en/2.11.x/
 
 # Project Members
-
-- Maanas Arora (Student No. 301104048)
+- Maanas Arora, 301104048
+- Hassan Shabbir, 301031788
