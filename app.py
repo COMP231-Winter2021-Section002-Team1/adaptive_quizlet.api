@@ -7,9 +7,12 @@ app = Flask(__name__)
 def home_page():
     return render_template('index.html')
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
-    return 'This is the signup page'
+    if request.method == 'GET':
+        return 'This is the signup page'
+    elif request.method == 'POST':
+        return 'You have posted to the signup page'
 
 @app.route('/signin')
 def signin_page():
