@@ -51,8 +51,9 @@ def home_page():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'GET':
-        return 'This is the signup page'
+        return render_template('signup.html')
     elif request.method == 'POST':
+        # TODO insert request.form['name'] into database
         return 'You have posted to the signup page'
 
 @app.route('/signin')
