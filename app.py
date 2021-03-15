@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, g, current_app
 import sqlite3
+import re
 
 app = Flask(__name__)
 
@@ -45,20 +46,54 @@ init_db()
 
 @app.route('/')
 def home_page():
-    user = query_db('SELECT * from user', one=True)
-    return render_template('index.html', user = user)
+    users = query_db('SELECT * FROM user')
+    return render_template('index.html', users = users)
+
+
+
+def validate(text, pattern):
+    regex = re.compile(pattern, re.I)
+    match = regex.match(text)
+    return bool(match)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'GET':
         return render_template('signup.html')
-    elif request.method == 'POST':
-        # TODO insert request.form['name'] into database
-        return 'You have posted to the signup page'
 
-@app.route('/signin')
+    elif request.method == 'POST':
+        if (validate(request.form['name'], '(\w| )+')
+            and validate(request.form['email'], '.+\@.+\..+') 
+            and validate(request.form['password'], '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+        ):
+            db = get_db()
+            db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', 
+                    tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            db.commit()
+
+            return 'Vaild info has been sent to Flask'
+        else:
+            return 'Invalid info has been sent to Flask'
+
+
+
+@app.route('/signin', methods=['GET', 'POST'])
 def signin_page():
-    return 'This is the signin page'
+    if request.method == 'GET':
+        return render_template('signin.html')
+
+    elif request.method == 'POST':
+        if (validate(request.form['email'], '.+\@.+\..+') 
+            and validate(request.form['password'], '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+        ):
+            user = query_db('SELECT * FROM user WHERE email = ? AND password = ?', (request.form['email'], request.form['password']), one=True)
+            if user is None:
+                return 'User does not exist'
+            return user
+        else:
+            return 'Invalid info has been sent to Flask'
+
+
 
 if __name__ == '__main__':
     app.run()

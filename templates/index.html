@@ -12,10 +12,12 @@
 {% block content %}
   <h1>Index</h1>
   <p class="important"> Welcome to my awesome homepage.</p>
+  {% for user in users %}
   <p>ID: {{ user.id }}</p>
   <p>Name: {{ user.name }}</p>
   <p>Email: {{ user.email }}</p>
   <p>Password: {{ user.password }}</p>
+  {% endfor %}
 {% endblock %}
 
 {% block footer %}
