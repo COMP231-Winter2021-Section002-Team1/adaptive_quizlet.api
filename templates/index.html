@@ -11,8 +11,10 @@
 
 {% block content %}
   <h1>Index</h1>
-  <p class="important">
-    Welcome on my awesome homepage.
+  <p class="important"> Welcome to my awesome homepage.</p>
+  <p>ID: {{ user.id }}</p>
+  <p>Username: {{ user.username }}</p>
+  <p>Password: {{ user.password }}</p>
 {% endblock %}
 
 {% block footer %}
