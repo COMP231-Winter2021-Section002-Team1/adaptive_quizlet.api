@@ -147,7 +147,7 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# profiling data
+# profiling flaskr
 .prof
 
 # End of https://www.toptal.com/developers/gitignore/api/django
