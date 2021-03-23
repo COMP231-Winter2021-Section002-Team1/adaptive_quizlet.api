@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quiz Settings</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',filename='styles/style.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Quiz Settings</h1>
+    <form action="" method="POST">
+      <ul style="list-style: none">
+        <li>
+          <label for="quizType">Quiz Question Type</label>
+          <select id="quizType" name="quizType">
+            <option>Challenge</option>
+            <option>Check Your Understanding</option>
+            <option>Bonus Points</option>
+            <option>Normal</option>
+          </select>
+        </li>
+        <li>
+          <input id="visibility" name="visibility" type="checkbox" />
+          <label for="visibility">Public Visibility</label>
+        </li>
+        <li>
+          <input type="submit" />
+        </li>
+      </ul>
+    </form>
+  </body>
+</html>
