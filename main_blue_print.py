@@ -36,9 +36,10 @@ def signup_page(page):
             # and
             validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
-            # guest = User.create(tuple([request.form[val] for val in ['name', 'email', 'password']]))
-            # db.session.add(guest)
-            # db.session.commit()
+            guest = User.create(tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            db.session.add(guest)
+            db.session.commit()
+            # choice1 = Choice()
 
             return 'Vaild info has been sent to Flask'
         else:

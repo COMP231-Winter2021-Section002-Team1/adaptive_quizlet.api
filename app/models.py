@@ -11,13 +11,12 @@ class User(db.Model):
     def create(*args):
         return User(name=args[0], email=args[1], password=args[2])
 
+
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), nullable=False)
     limited_time = db.Column(db.Integer, nullable=False)
-    posted_at = db.Column(db.DateTime, nullable=False,
-                       default=datetime.utcnow)
-
+    posted_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     questions = db.relationship("Question",
                              primaryjoin="and_(Quiz.id==Question.quiz_id,)")
 
@@ -28,15 +27,12 @@ class Quiz(db.Model):
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    choice_id = db.Column(db.Integer, db.ForeignKey('choice.id'), nullable=False)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
-    choices = db.relationship("Choice",
-                             primaryjoin="and_(Question.id==Choice.question_id,)")
+    choices = db.relationship("Choice", primaryjoin="and_(Question.id==Choice.question_id,)")
 
 
 class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
-    questions = db.relationship("Question",
-                             primaryjoin="and_(Choice.id==Question.choice_id,)")
+    correct = db.Column(db.Boolean, default=False)
