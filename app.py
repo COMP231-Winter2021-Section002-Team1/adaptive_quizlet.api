@@ -1,5 +1,5 @@
 # Flask web framework
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, redirect, session, url_for, flash
 # Database
 import sqlite3
 # Regular Expressions
@@ -7,6 +7,7 @@ import re
 
 # Initialize
 app = Flask(__name__)
+app.secret_key = 'hello' # secretkey for session
 
 ################################################################################
 # Database Configuration and Helpers
@@ -81,7 +82,7 @@ def signup_page():
     elif request.method == 'POST':
         if (validate('name', '(\w| )+')
             and validate('email', '.+\@.+\..+') 
-            and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+            # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
             db = get_db()
             db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', 
@@ -93,7 +94,6 @@ def signup_page():
             return 'Invalid info has been sent to Flask'
 
 
-
 # Show signin form and return user if found
 @app.route('/signin', methods=['GET', 'POST'])
 def signin_page():
@@ -102,17 +102,39 @@ def signin_page():
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+') 
-            and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+            # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
             user = query_db('SELECT * FROM user WHERE email = ? AND password = ?', 
                     (request.form['email'], request.form['password']), one=True)
+            session['user'] = user
+            print(session['user'], "user to session")
             if user is None:
                 return 'User does not exist'
             else:
-                return user
+                # return user
+                return  redirect(url_for('home_page')) 
         else:
             return 'Invalid info has been sent to Flask'
+    
 
+# Could be used as a own quiz page
+@app.route('/user')
+def user():
+    if 'user' in session:
+        user = session['user']
+        return render_template('logged_in.html', user=user)
+    else:
+        return redirect(url_for('signin_page'))
+    
+# logout session
+@app.route('/logout')
+def logout():
+    print(session['user'], "before logout")
+    session['user'] = None # {..., 'user' : None}
+    flash("You have been logged out", "success")
+    return redirect(url_for('home_page'))
+
+    
 
 
 # Initialize application
