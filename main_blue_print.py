@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, request
+from flask import Blueprint, abort, render_template, request, g, redirect, session, url_for, flash
 import re
 from jinja2 import TemplateNotFound
 from app.models import User, Question, Quiz, Choice
@@ -81,6 +81,15 @@ def signin_page(page):
                 return user.email
         else:
             return 'Invalid info has been sent to Flask'
+
+
+# logout session
+@main.route('/logout')
+def logout(page):
+    # print(session['user'], "before logout")
+    session['user'] = None # {..., 'user' : None}
+    flash("You have been logged out", "success")
+    return redirect(url_for('home_page'))
 
 
 # Validate data format is correct
