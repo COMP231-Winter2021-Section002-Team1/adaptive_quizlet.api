@@ -1,5 +1,5 @@
 # Flask web framework
-from flask import Flask, render_template, request, g
+from flask import Flask, abort, render_template, request, g
 # Database
 import sqlite3
 # Regular Expressions
@@ -15,6 +15,8 @@ app = Flask(__name__)
 DATABASE = 'database.db'
 
 # Connect to SQLite and return dicts from db
+
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -52,6 +54,7 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
+
 init_db()
 
 
@@ -62,8 +65,7 @@ init_db()
 @app.route('/')
 def home_page():
     users = query_db('SELECT * FROM user')
-    return render_template('index.html', users = users)
-
+    return render_template('index.html', users=users)
 
 
 # Validate data format is correct
@@ -73,6 +75,8 @@ def validate(text, pattern):
     return bool(match)
 
 # Show signup form and process and save returned form data
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'GET':
@@ -80,18 +84,17 @@ def signup_page():
 
     elif request.method == 'POST':
         if (validate('name', '(\w| )+')
-            and validate('email', '.+\@.+\..+') 
+            and validate('email', '.+\@.+\..+')
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
-        ):
+            ):
             db = get_db()
-            db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', 
-                    tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+                       tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.commit()
 
             return 'Vaild info has been sent to Flask'
         else:
             return 'Invalid info has been sent to Flask'
-
 
 
 # Show signin form and return user if found
@@ -101,11 +104,11 @@ def signin_page():
         return render_template('signin.html')
 
     elif request.method == 'POST':
-        if (validate('email', '.+\@.+\..+') 
+        if (validate('email', '.+\@.+\..+')
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
-        ):
-            user = query_db('SELECT * FROM user WHERE email = ? AND password = ?', 
-                    (request.form['email'], request.form['password']), one=True)
+            ):
+            user = query_db('SELECT * FROM user WHERE email = ? AND password = ?',
+                            (request.form['email'], request.form['password']), one=True)
             if user is None:
                 return 'User does not exist'
             else:
@@ -114,10 +117,35 @@ def signin_page():
             return 'Invalid info has been sent to Flask'
 
 
+# Show quiz settings page for a quiz
+@app.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
+def quiz_settings_page(quiz_id):
+    quiz = query_db('SELECT * FROM quiz WHERE id = ?',
+                    (quiz_id), one=True)
+    if quiz is None:
+        abort(404)
+
+    if request.method == 'GET':
+        return render_template('quiz/quiz_settings.html',
+                               quiz_id=quiz['id'],
+                               quiz_name=quiz['name'],
+                               quiz_type=quiz['quiz_type'],
+                               quiz_visibility=quiz['visibility'])
+
+    if request.method == 'POST':
+        db = get_db()
+        db.execute('UPDATE quiz SET name=?, quiz_type=?, visibility=? WHERE id=?',
+                   (request.form['quiz_name'],
+                    request.form['quiz_type'],
+                    'TRUE' if 'quiz_visibility' in request.form else 'FALSE',
+                    quiz_id))
+        db.commit()
+
+        quiz = query_db('SELECT * FROM quiz WHERE id = ?',
+                        (quiz_id), one=True)
+        return quiz
+
 
 # Initialize application
 if __name__ == '__main__':
     app.run()
-
-
-
