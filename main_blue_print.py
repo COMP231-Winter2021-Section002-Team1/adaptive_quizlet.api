@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, abort, request
 import re
 from jinja2 import TemplateNotFound
-from app.models import User
+from app.models import User, Question, Quiz, Choice
 from app import db
+from datetime import datetime
 
 main = Blueprint('main_page', __name__,
                  template_folder='templates')
@@ -12,12 +13,28 @@ main = Blueprint('main_page', __name__,
 @main.route('/<page>')
 def show(page):
     # users = query_db('SELECT * FROM user')
-    # admin = User(name='admin', email='admin@example.com', password='123')
-    # guest = User(name='guest', email='guest@example.com', password='123')
-    # db.session.add(admin)
-    # db.session.add(guest)
+    db.drop_all()
+    db.create_all()
+    admin = User(name='admin', email='admin@example.com', password='123')
+    guest = User(name='guest', email='guest@example.com', password='123')
+    db.session.add(admin)
+    db.session.add(guest)
     # db.session.commit()
+    quiz = Quiz(id=1, title="Quiz 1", limited_time=12, posted_at=datetime.now(), )
+    choice1 = Choice(id=1, content="1", question_id=1)
+    choice2 = Choice(id=2, content="2", question_id=1, correct=True)
+    choice3 = Choice(id=3, content="3", question_id=1)
+    choice4 = Choice(id=4, content="4", question_id=1)
+    question = Question(content="1+1=?", quiz_id=1, actual_answer=2)
+    db.session.add(quiz)
+    db.session.add(choice1)
+    db.session.add(choice2)
+    db.session.add(choice3)
+    db.session.add(choice4)
+    db.session.add(question)
+    db.session.commit()
     users = User.query.all()
+    quiz = Quiz.query.all()
     try:
         return render_template('%s.html' % page, users=users)
     except TemplateNotFound:
@@ -31,10 +48,10 @@ def signup_page(page):
         return render_template('signup.html')
     elif request.method == 'POST':
         if (
-            #     validate('name', '(\w| )+')
-            # and validate('email', '.+\@.+\..+')
-            # and
-            validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+                validate('name', '(\w| )+')
+                and validate('email', '.+\@.+\..+')
+                and
+                validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
             guest = User.create(tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.session.add(guest)
@@ -48,14 +65,14 @@ def signup_page(page):
 
 # Show signin form and return user if found
 # Show signup form and process and save returned form data
-@main.route('/signin',  defaults={'page': 'signin'}, methods=['GET', 'POST'])
+@main.route('/signin', defaults={'page': 'signin'}, methods=['GET', 'POST'])
 def signin_page(page):
     if request.method == 'GET':
         return render_template('signin.html')
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+')
-            # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+                and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
             user = User.query.filter_by(email=request.form['email'], password=request.form['password']).first()
             if user is None:
@@ -64,8 +81,6 @@ def signin_page(page):
                 return user.email
         else:
             return 'Invalid info has been sent to Flask'
-
-
 
 
 # Validate data format is correct
