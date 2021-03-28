@@ -15,8 +15,9 @@ def show(page):
     # users = query_db('SELECT * FROM user')
     db.drop_all()
     db.create_all()
-    admin = User(name='admin', email='admin@example.com', password='123')
-    guest = User(name='guest', email='guest@example.com', password='123')
+
+    admin = User(name='admin', email='hassan149367@gmail.com', password='password')
+    guest = User(name='guest', email='a@a.a', password='123')
     db.session.add(admin)
     db.session.add(guest)
     # db.session.commit()
