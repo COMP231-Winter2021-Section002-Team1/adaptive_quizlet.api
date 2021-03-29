@@ -8,5 +8,5 @@ CREATE TABLE user (
   password TEXT NOT NULL
 );
 
--- Initialize data in db with example data
+-- Initialize flaskr in db with example flaskr
 INSERT INTO user VALUES (0, "hassan", "hassan149367@gmail.com", "password");

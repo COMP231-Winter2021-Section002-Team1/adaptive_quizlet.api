@@ -36,35 +36,27 @@
           Happy quiz-taking :) 
         </p>
         <div class="text-center">
-
-          
-            {% if session['user'] is not none %}
-            <a href="{{ url_for('logout') }}" class="btn btn-warning">Logout</a>
+            {% if 'user' in session and session['user'] %}
+            <a href="logout" class="btn btn-warning">Logout</a>
             <!-- {{session['user']}}
             {{user}}
             {{"1"}} -->
-            {% elif session['user'] is none %}
+            {% else %}
             <a href="signin" class="btn btn-primary">Sign In</a>
             <a href="signup" class="btn btn-success">Sign Up</a>
-            <!-- {{session['user']}}
+
             {{user}}
-            {{"2"}} -->
-            {% else %}
-            <!-- {{"3"}} -->
             {% endif %}
-            
-                
+
         </div>
       </div>
     </div>
-
-      <!-- <p class="important"> Welcome to my awesome homepage.</p>
-      {% for user in users %}
-      <p>ID: {{ user.id }}</p>
-      <p>Name: {{ user.name }}</p>
-      <p>Email: {{ user.email }}</p>
-      <p>Password: {{ user.password }}</p>
-      {% endfor %} -->
+{#      {% for user in users %}#}
+{#      <p>ID: {{ user.id }}</p>#}
+{#      <p>Name: {{ user.name }}</p>#}
+{#      <p>Email: {{ user.email }}</p>#}
+{#      <p>Password: {{ user.password }}</p>#}
+{#      {% endfor %} -->#}
 {% endblock %}
 
 {% block footer %}

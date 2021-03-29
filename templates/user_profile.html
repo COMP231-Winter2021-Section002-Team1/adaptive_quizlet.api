@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Welcome to Quizlet {{user.name}}!</h1>
+  <div id="content">
+    <button class="btn btn-danger btn-sm active"  onclick="javascript:window.history.back(-1);return false;">Back</button>
+      <div class="mt-2">
+        <a class="btn btn-primary btn-sm active"  href="/available_quizzes">View Available Quizzes</a>
+      </div>
+  </div>
+
+{% endblock %}
+
+{% block footer %}
+<p>Copyright 2021 &copy; COMP231-S2G1</p>
+{% endblock %}
