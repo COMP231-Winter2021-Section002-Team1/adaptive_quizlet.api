@@ -36,7 +36,7 @@
           Happy quiz-taking :) 
         </p>
         <div class="text-center">
-            {% if 'user' in session %}
+            {% if 'user' in session and session['user'] %}
             <a href="logout" class="btn btn-warning">Logout</a>
             <!-- {{session['user']}}
             {{user}}

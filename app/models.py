@@ -1,12 +1,18 @@
 from . import db
 from datetime import datetime
 
+available_quizzes = db.Table('available_quizzes',
+                             db.Column("user_email", db.String(120), db.ForeignKey('user.email'), primary_key=True),
+                             db.Column("quiz_id", db.Integer, db.ForeignKey('quiz.id'), primary_key=True)
+                             )
+
 
 class User(db.Model):
-    __tablename__ = 'user'
     email = db.Column(db.String(120), primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(20), nullable=False)
+    user_quizzes = db.relationship('Quiz', secondary=available_quizzes, lazy='subquery',
+                                   backref=db.backref('user', lazy=True))
 
     @staticmethod
     def create(*args):
@@ -34,9 +40,7 @@ class Quiz(db.Model):
     title = db.Column(db.String(80), nullable=False)
     limited_time = db.Column(db.Integer, nullable=False)
     posted_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    questions = db.relationship("Question",  backref='quiz', lazy=True)
+    questions = db.relationship("Question", backref='quiz', lazy=True)
 
     def __repr__(self):
         return '<Post %r>' % self.title
-
-

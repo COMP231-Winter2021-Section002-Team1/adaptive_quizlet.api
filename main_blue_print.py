@@ -1,41 +1,35 @@
 from flask import Blueprint, abort, render_template, request, g, redirect, session, url_for, flash
+
 import re
 from jinja2 import TemplateNotFound
 from app.models import User, Question, Quiz, Choice
 from app import db
 from datetime import datetime
 
-main = Blueprint('main_page', __name__,
+main = Blueprint('main', __name__,
                  template_folder='templates')
 
 
 @main.route('/', defaults={'page': 'index'})
 @main.route('/<page>')
-def show(page):
-    # users = query_db('SELECT * FROM user')
+def index(page):
     db.drop_all()
     db.create_all()
-
-    admin = User(name='admin', email='hassan149367@gmail.com', password='password')
+    admin = User(name='Hassan', email='hassan149367@gmail.com', password='password')
     guest = User(name='guest', email='a@a.a', password='123')
     db.session.add(admin)
     db.session.add(guest)
-    # db.session.commit()
-    quiz = Quiz(id=1, title="Quiz 1", limited_time=12, posted_at=datetime.now(), )
-    choice1 = Choice(id=1, content="1", question_id=1)
-    choice2 = Choice(id=2, content="2", question_id=1, correct=True)
-    choice3 = Choice(id=3, content="3", question_id=1)
-    choice4 = Choice(id=4, content="4", question_id=1)
-    question = Question(content="1+1=?", quiz_id=1, actual_answer=2)
+    quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now(),)
+    choice1 = Choice(content="1", question_id=1)
+    choice2 = Choice(content="2", question_id=1, correct=True)
+    choice3 = Choice(content="3", question_id=1)
+    choice4 = Choice(content="4", question_id=1)
+    question = Question(content="1+1=?", quiz_id=choice2.id, actual_answer=2, choices=[choice1, choice2, choice3, choice4])
+    quiz.questions = [question]
     db.session.add(quiz)
-    db.session.add(choice1)
-    db.session.add(choice2)
-    db.session.add(choice3)
-    db.session.add(choice4)
-    db.session.add(question)
+    admin.user_quizzes.append(quiz)
     db.session.commit()
     users = User.query.all()
-    quiz = Quiz.query.all()
     try:
         return render_template('%s.html' % page, users=users)
     except TemplateNotFound:
@@ -73,24 +67,33 @@ def signin_page(page):
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+')
-                and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+                # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
             user = User.query.filter_by(email=request.form['email'], password=request.form['password']).first()
+            session['user'] = user
             if user is None:
                 return 'User does not exist'
             else:
-                return user.email
+                return  render_template('%s.html' % 'user_profile', user=user)
         else:
             return 'Invalid info has been sent to Flask'
 
 
 # logout session
-@main.route('/logout')
+@main.route('/logout', defaults={'page': 'logout'})
 def logout(page):
     # print(session['user'], "before logout")
     session['user'] = None # {..., 'user' : None}
     flash("You have been logged out", "success")
-    return redirect(url_for('home_page'))
+    return redirect(url_for('main.index'))
+
+
+# logout session
+@main.route('/available_quizzes', defaults={'page': 'available_quizzes'})
+def available_quizzes(page):
+    if 'user' in session and session['user']:
+        return render_template('%s.html' % page, user=session['user'])
+    return redirect(url_for('main.logout'))
 
 
 # Validate data format is correct
