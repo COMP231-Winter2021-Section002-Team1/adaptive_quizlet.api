@@ -1,18 +1,20 @@
-<!doctype html>
-<html>
-<head>
-  {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <title>{% block title %}{% endblock %}</title>
-  {% endblock %}
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
   <h1>You are logged in</h1>
-  <div id="content">{% block content %}{% endblock %}</div>
-  <footer>
-    {% block footer %}
-    <p>Copyright 2021 &copy; COMP231-S2G1</p>
-    {% endblock %}
-  </footer> 
-</body>
-</html>
+  <div id="content">
+      <h1>Welcome {{user.name}}</h1>
+  </div>
+
+  <button>
+    <a href="/available_quizzes">View Available Quizzes</a>
+  </button>
+  <!-- logout btn here -->
+  <button>
+    <a href="{{ url_for('logout') }}">Log out</a>
+  </button>
+{% endblock %}
+
+{% block footer %}
+<p>Copyright 2021 &copy; COMP231-S2G1</p>
+{% endblock %}
