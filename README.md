@@ -23,7 +23,7 @@ https://jinja.palletsprojects.com/en/2.11.x/
 - Sarmad Siddiqi, 300978624
 - Dharun Raju, 301030187
 
-### Schemes
+### Schemas
 #### Quiz 
 field|type|
 ---|--- |
