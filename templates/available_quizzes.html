@@ -6,9 +6,13 @@
     <button class="btn btn-danger btn-sm active my-2"  onclick="javascript:window.history.back(-1);return false;">Back</button>
     <div class="flex-column">
         {% for quiz in user.user_quizzes %}
-    <div class="card px-4 py-2">
+    <div class="card px-2 py-1">
             <div>Quiz title: {{ quiz.title }}</div>
             <div>Posted at: {{ quiz.posted_at }}</div>
+            <div class="mt-2">
+        <a class="btn btn-success btn-sm active"  href="/publish">Publish</a>
+        <a class="btn btn-primary btn-sm active"  href="/setting">Settings</a>
+      </div>
     </div>
       {% endfor %}
     </div>
