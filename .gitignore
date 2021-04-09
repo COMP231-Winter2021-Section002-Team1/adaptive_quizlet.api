@@ -157,3 +157,6 @@ dmypy.json
 
 # vs code
 *.vs/
+
+# flask_session
+flask_session
