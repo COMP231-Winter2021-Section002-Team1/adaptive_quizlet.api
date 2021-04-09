@@ -1,0 +1,121 @@
+{% extends "base.html" %} {% block title %}Quiz Settings{% endblock %} {% block
+head %}{{ super() }}{% endblock %} {% block content %}
+
+<h1>{{ quiz_name }} - Questions</h1>
+
+<form action="/quizzes/{{ quiz_id }}/questions" method="POST">
+  <div id="questions"></div>
+  <button type="button" id="add_question">Add New Question</button>
+  <input type="submit" />
+</form>
+
+<script>
+  let questions = [];
+  let questionAddButton = document.getElementById("add_question");
+  let questionsDiv = document.getElementById("questions");
+
+  function deleteQuestion(questionId) {
+    return () => {
+      updateData();
+
+      questions = questions
+        .slice(0, questionId)
+        .concat(questions.slice(questionId + 1, questions.Length));
+      updateUi();
+    };
+  }
+
+  function updateData() {
+    for (let i = 1; i <= questionsDiv.children.length; i++) {
+      questions[i - 1].text = document.getElementById(
+        "question_" + i.toString() + "_text"
+      ).value;
+
+      numberOfChoices = questionsDiv.children[i - 1].querySelector("ul")
+        .children.length;
+
+      for (let j = 0; j < numberOfChoices; j++) {
+        questions[i - 1].choices[j] = document.getElementById(
+          "question_" + i.toString() + "_choice_" + (j + 1).toString()
+        ).value;
+
+        if (
+          document.getElementById(
+            "question_" +
+              i.toString() +
+              "_choice_" +
+              (j + 1).toString() +
+              "_correct"
+          ).checked
+        )
+          questions[i - 1].correctChoice = j;
+      }
+    }
+  }
+
+  function updateUi() {
+    questionsDiv.innerHTML = "";
+
+    for (let i = 1; i <= questions.length; i++) {
+      let question = questions[i - 1];
+
+      let questionDiv = document.createElement("div");
+      questionDiv.id = "question_" + i.toString();
+      let questionHeader = document.createElement("h3");
+
+      questionHeader.innerText = "Question " + i.toString();
+      questionDiv.appendChild(questionHeader);
+      let questionText = document.createElement("input");
+      questionText.id = "question_" + i.toString() + "_text";
+      questionText.value = question.text;
+      questionDiv.appendChild(questionText);
+
+      let deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.innerText = "Delete Question";
+
+      deleteButton.addEventListener("click", deleteQuestion(i - 1));
+      questionDiv.append(deleteButton);
+
+      let choiceList = document.createElement("ul");
+      choiceList.style = "list-style-type: None";
+      for (let j = 1; j <= question.choices.length; j++) {
+        let choice = question.choices[j - 1];
+
+        let choiceRadio = document.createElement("input");
+        choiceRadio.id =
+          "question_" + i.toString() + "_choice_" + j.toString() + "_correct";
+        choiceRadio.type = "radio";
+        choiceRadio.name = "question_" + i.toString() + "_choices";
+        let choiceText = document.createElement("input");
+        choiceText.id = "question_" + i.toString() + "_choice_" + j.toString();
+        choiceText.value = choice;
+        let choiceElement = document.createElement("li");
+        choiceElement.appendChild(choiceRadio);
+        choiceElement.appendChild(choiceText);
+        choiceList.appendChild(choiceElement);
+      }
+      questionDiv.appendChild(choiceList);
+
+      questionsDiv.appendChild(questionDiv);
+    }
+  }
+
+  function addQuestion() {
+    updateData();
+
+    questions.push({
+      text: "Question Text",
+      choices: ["Choice 1", "Choice 2", "Choice 3", "Choice 4"],
+      correctChoice: null,
+    });
+
+    updateUi();
+  }
+
+  questionAddButton.addEventListener("click", addQuestion);
+</script>
+
+{% endblock %} {% block footer %} {{ super() }}
+<p>This is the footer from the quiz settings child template</p>
+{% endblock %}
