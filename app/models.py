@@ -15,7 +15,7 @@ class User(db.Model):
                                    backref=db.backref('user', lazy=True))
 
     @staticmethod
-    def create(*args):
+    def create(args):
         return User(name=args[0], email=args[1], password=args[2])
 
 
