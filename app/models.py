@@ -49,8 +49,10 @@ class QuizResult(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_choices = db.relationship("UserChoice", backref='quiz_result', lazy=True)
+
     def __str__(self):
         return f"{self.quiz.title} quiz result is {len([x for x in self.user_choices if x.answer_right])/len(self.user_choices)*100}%."
+
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,6 +64,15 @@ class Quiz(db.Model):
     status = db.Column(db.Enum(QuizStatus), default=QuizStatus.Public)
     user_email = db.Column(db.String(120),  db.ForeignKey('user.email'),)
     quiz_results = db.relationship("QuizResult", backref='quiz', lazy=False)
+
+    @property
+    def posted_at_string(self):
+        return self.posted_at.strftime("%B %d, %Y %H:%M:%S")
+
+    @property
+    def questions_count(self):
+        return len(self.questions)
+
 
     def __repr__(self):
         return '<Post %r>' % self.title

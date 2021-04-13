@@ -1,16 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-  <h4>Available Quizzes</h4>
-  <div id="content">
-  </div>
-    <button class="btn btn-danger btn-sm active my-2"  onclick="javascript:window.history.back(-1);return false;">Back</button>
-{#    <div class="flex-column">#}
-{#        {% for quiz in user.user_quizzes %}#}
-{#    <div class="card px-4 py-2">#}
-{#            <div>Quiz title: {{ quiz.title }}</div>#}
-{#            <div>Posted at: {{ quiz.posted_at }}</div>#}
-{#    </div>#}
-{#      {% endfor %}#}
-{#    </div>#}
+    <h4>Available Quizzes</h4>
+    <div id="content">
+    </div>
+    <button class="btn btn-danger active my-2" onclick="javascript:window.history.back(-1);return false;">Back</button>
+    <div class="flex-column">
+        {% for quiz in quizzes %}
+            <div class="card px-4 py-2 drop-shadow">
+                <div class="d-md-flex flex-md-row justify-content-md-between align-items-md-center">
+                    <div>
+                        <div>Quiz title: {{ quiz.title }}</div>
+                        <div>Number of questions: {{ quiz.questions_count }}</div>
+                        <div>Time limit: {{ quiz.limited_time }} min</div>
+                        <div>Posted at: {{ quiz.posted_at_string }}</div>
+                        <div>Created by: {{ quiz.user.name }}</div>
+                    </div>
+                    <a class="btn btn-primary">Start Quiz</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
 

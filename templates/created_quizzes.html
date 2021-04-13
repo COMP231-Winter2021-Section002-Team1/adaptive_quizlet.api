@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <h4>My Quizzes</h4>
+    <div id="content">
+    </div>
+    <button class="btn btn-danger btn-sm active my-2" onclick="javascript:window.history.back(-1);return false;">Back
+    </button>
+        {% for quiz in quizzes %}
+            <div class="card px-4 py-2 drop-shadow">
+                <h5 class="card-title">{{ quiz.title }}</h5>
+                <div>Number of questions: {{ quiz.questions_count }}</div>
+                <div>Posted at: {{ quiz.posted_at_string }}</div>
+                <div>Created by: {{ quiz.user.name }}</div>
+            </div>
+        {% endfor %}
+{% endblock %}
+

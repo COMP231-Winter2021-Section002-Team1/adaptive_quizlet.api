@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
 
 from app import db
-from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice
+from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizStatus
 
 main = Blueprint('main', __name__,
                  template_folder='templates')
@@ -102,9 +102,17 @@ def signin_page(page):
             if user is None:
                 return 'User does not exist'
             else:
-                return render_template('%s.html' % 'user_profile', user=user)
+                return redirect(url_for('main.user_profile'))
         else:
             return 'Invalid info has been sent to Flask'
+
+
+@main.route('/user_profile', defaults={'page': 'user_profile'},)
+def user_profile(page):
+    if 'user' in session and session['user']:
+        return render_template('user_profile.html', user=session['user'])
+    else:
+        return redirect(url_for('main.signin_page'))
 
 
 # logout session
@@ -120,7 +128,16 @@ def logout(page):
 @main.route('/available_quizzes', defaults={'page': 'available_quizzes'})
 def available_quizzes(page):
     if 'user' in session and session['user']:
-        return render_template('%s.html' % page, user=session['user'])
+        quizzes = Quiz.query.filter_by(status=QuizStatus.Public).all()
+        return render_template('%s.html' % page, user=session['user'], quizzes=quizzes)
+    return redirect(url_for('main.logout'))
+
+# logout session
+@main.route('/created_quizzes', defaults={'page': 'created_quizzes'})
+def created_quizzes(page):
+    if 'user' in session and (user := session['user']):
+        quizzes = Quiz.query.filter_by(user_email=user.email).all()
+        return render_template('created_quizzes.html', user=session['user'], quizzes=quizzes)
     return redirect(url_for('main.logout'))
 
 
