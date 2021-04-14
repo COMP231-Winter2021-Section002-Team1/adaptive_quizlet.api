@@ -4,7 +4,7 @@ from datetime import datetime
 from . import db
 
 
-class QuizStatus(enum.Enum):
+class QuizVisibility(enum.Enum):
     Public = "Public"
     Private = "Private"
 
@@ -61,7 +61,7 @@ class Quiz(db.Model):
     limited_time = db.Column(db.Integer)
     posted_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     questions = db.relationship("Question", backref='quiz', lazy=True)
-    status = db.Column(db.Enum(QuizStatus), default=QuizStatus.Public)
+    visibility = db.Column(db.Enum(QuizVisibility), default=QuizVisibility.Public)
     user_email = db.Column(db.String(120),  db.ForeignKey('user.email'),)
     quiz_results = db.relationship("QuizResult", backref='quiz', lazy=False)
 

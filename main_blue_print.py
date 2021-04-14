@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
 
 from app import db
-from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizStatus
+from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
 
 main = Blueprint('main', __name__,
                  template_folder='templates')
@@ -129,20 +129,42 @@ def logout(page):
 @main.route('/available_quizzes', defaults={'page': 'available_quizzes'})
 def available_quizzes(page):
     if 'user' in session and session['user']:
-        quizzes = Quiz.query.filter_by(status=QuizStatus.Public).all()
+        quizzes = Quiz.query.filter_by(visibility=QuizVisibility.Public).all()
         return render_template('%s.html' % page, user=session['user'], quizzes=quizzes)
     return redirect(url_for('main.logout'))
 
+
 # logout session
-@main.route('/created_quizzes', defaults={'page': 'created_quizzes'})
-def created_quizzes(page):
+@main.route('/created_quizzes',)
+def created_quizzes():
     if 'user' in session and (user := session['user']):
         quizzes = Quiz.query.filter_by(user_email=user.email).all()
         return render_template('created_quizzes.html', user=session['user'], quizzes=quizzes)
     return redirect(url_for('main.logout'))
 
 
-# Validate data format is correct
+# logout session
+@main.route('/create_quiz', methods=['GET', 'POST'])
+def create_quiz():
+    if 'user' in session and (user := session['user']):
+        if request.method == 'GET':
+            # if quiz_id:
+            #     quiz = Quiz.query.filter_by(id=quiz_id)
+            #     return  render_template('create_quiz.html', quiz=quiz)
+            # else:
+            return render_template('create_quiz.html')
+        elif request.method == 'POST':
+            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],limited_time=request.form['limited_time'], visibility=request.form['visibility'])
+            user = User.query.filter_by(email=user.email).first()
+            user.created_quizzes.append(quiz)
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for('main.user_profile'))
+    return redirect(url_for('main.logout'))
+    # return redirect(url_for('main.logout'))`
+
+
+# Validate data format is correct šäguöräñ
 def validate(text, pattern):
     regex = re.compile(pattern, re.I)
     match = regex.match(request.form[text])

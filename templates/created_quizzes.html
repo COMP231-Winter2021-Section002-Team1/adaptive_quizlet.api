@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-    <h4>My Quizzes</h4>
+    <h4>Created Quizzes</h4>
     <div id="content">
     </div>
-    <button class="btn btn-danger btn-sm active my-2" onclick="javascript:window.history.back(-1);return false;">Back
+    <button class="btn btn-danger active my-2" onclick="javascript:window.history.back(-1);return false;">Back
     </button>
         {% for quiz in quizzes %}
-            <div class="card px-4 py-2 drop-shadow">
-                <h5 class="card-title">{{ quiz.title }}</h5>
-                <div>Number of questions: {{ quiz.questions_count }}</div>
-                <div>Posted at: {{ quiz.posted_at_string }}</div>
-                <div>Created by: {{ quiz.user.name }}</div>
+            <div class="card p-2 mt-2 mb-4 drop-shadow">
+                <div class="d-md-flex flex-md-row justify-content-md-between align-items-md-center">
+                    <div>
+                        <div>Quiz title: {{ quiz.title }}</div>
+                        <div>Number of questions: {{ quiz.questions_count }}</div>
+                        <div>Time limit: {{ quiz.limited_time }} min</div>
+                        <div>Posted at: {{ quiz.posted_at_string }}</div>
+                        <div>Created by: {{ quiz.user.name }}</div>
+                    </div>
+                    <a class="btn btn-primary" href="/edit_quiz/{{ quiz.id }}">Edit Quiz</a>
+                </div>
             </div>
         {% endfor %}
 {% endblock %}
