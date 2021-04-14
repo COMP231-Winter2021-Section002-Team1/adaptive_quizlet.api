@@ -4,9 +4,10 @@ from flask import Flask, abort, render_template, request, g
 import sqlite3
 # Regular Expressions
 import re
+from app import create_app
 
 # Initialize
-app = Flask(__name__)
+# app = Flask(__name__)
 
 ################################################################################
 # Database Configuration and Helpers
@@ -148,4 +149,4 @@ def quiz_settings_page(quiz_id):
 
 # Initialize application
 if __name__ == '__main__':
-    app.run()
+    create_app().run()

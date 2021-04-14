@@ -24,27 +24,4 @@ https://jinja.palletsprojects.com/en/2.11.x/
 - Dharun Raju, 301030187
 
 ### Schemas
-#### Quiz 
-field|type|
----|--- |
-id|int| 
-questions|list| 
-title|str| 
-limited_time|int| 
-posted_at|datetime|
-
-#### Question
-field|type|
----|--- |
-id | int|
-quiz_id|int|
-choices|list|
-content| str|
-
-#### Choice
-field|type|
----|--- |
-id | int|
-question_id|int|
-content| str|
-correct| bool|
+![image info](static/img/img.png)
