@@ -24,7 +24,7 @@ class User(db.Model):
     created_quizzes = db.relationship("Quiz", backref='user', lazy=True)
     quizzes_results = db.relationship("QuizResult", backref='user', lazy=True)
     @staticmethod
-    def create(*args):
+    def create(args):
         return User(name=args[0], email=args[1], password=args[2])
 
 

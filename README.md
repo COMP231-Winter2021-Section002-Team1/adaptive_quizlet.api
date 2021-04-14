@@ -1,4 +1,12 @@
 ### adaptive_quizlet.api
+##### Run project steps on Windows 10
+1. Open command prompt at project folder
+2. Activate python virtual environment(venv), run
+```cmd
+set FLASK_APP=app.py
+pip install -r requirements.txt
+flask run
+```
 
 ##### Using Flask framework for backend development 
 https://flask.palletsprojects.com/en/1.1.x/
@@ -15,14 +23,12 @@ https://jinja.palletsprojects.com/en/2.11.x/
 - Sarmad Siddiqi, 300978624
 - Dharun Raju, 301030187
 
-### Schemes
+### Schemas
 #### Quiz 
 field|type|
 ---|--- |
 id|int| 
-taker_id|int| 
-maker_id|int| 
-question_id|int| 
+questions|list| 
 title|str| 
 limited_time|int| 
 posted_at|datetime|
@@ -32,12 +38,13 @@ field|type|
 ---|--- |
 id | int|
 quiz_id|int|
-answer_id|int|
+choices|list|
 content| str|
 
-#### Answer
+#### Choice
 field|type|
 ---|--- |
 id | int|
 question_id|int|
 content| str|
+correct| bool|
