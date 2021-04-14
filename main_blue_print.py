@@ -1,10 +1,10 @@
-from flask import Blueprint, abort, render_template, request, g, redirect, session, url_for, flash
-
 import re
-from jinja2 import TemplateNotFound
-from app.models import User, Question, Quiz, Choice
-from app import db
 from datetime import datetime
+
+from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
+
+from app import db
+from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
 
 main = Blueprint('main', __name__,
                  template_folder='templates')
@@ -13,26 +13,54 @@ main = Blueprint('main', __name__,
 @main.route('/', defaults={'page': 'index'})
 @main.route('/<page>')
 def index(page):
-    db.drop_all()
-    db.create_all()
-    admin = User(name='Hassan', email='hassan149367@gmail.com', password='password')
-    guest = User(name='guest', email='a@a.a', password='123')
-    db.session.add(admin)
-    db.session.add(guest)
-    quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now(),)
-    choice1 = Choice(content="1", question_id=1)
-    choice2 = Choice(content="2", question_id=1, correct=True)
-    choice3 = Choice(content="3", question_id=1)
-    choice4 = Choice(content="4", question_id=1)
-    question = Question(content="1+1=?", quiz_id=choice2.id, actual_answer=2, choices=[choice1, choice2, choice3, choice4])
-    quiz.questions = [question]
-    db.session.add(quiz)
-    admin.user_quizzes.append(quiz)
-    db.session.commit()
-    users = User.query.all()
     try:
+        db.drop_all()
+        db.create_all()
+        # create quiz maker
+        quiz_maker = User(name='Hassan', email='hassan149367@gmail.com', password='password')
+        # create quiz with single-choice questions
+        quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
+        # create and add question for the quiz
+        question = Question(content="1+1=?", correct_answer=2, choices=[
+            Choice(content="1"),
+            Choice(content="2"),
+            Choice(content="3"),
+            Choice(content="4"),
+        ])
+        quiz.questions.append(question)
+        quiz.questions.append(Question(content="1+2=?", correct_answer=3, choices=[
+            Choice(content="1"),
+            Choice(content="2"),
+            Choice(content="3"),
+            Choice(content="4"),
+        ]))
+        # add created quiz to quiz maker's created quizzes list
+        quiz_maker.created_quizzes.append(quiz)
+
+
+        # create quiz taker
+        quiz_taker = User(name='guest', email='a@a.a', password='123')
+        # quiz taker take a quiz, create user quiz result
+        quiz_result = QuizResult(quiz=quiz)
+        # add quiz result to the taker
+        quiz_taker.quizzes_results.append(quiz_result)
+        # set quiz taker's answer for question[0] in the quiz, here user choose the second choice which is at index 1
+        user_choice = quiz.questions[0].choices[1]
+        # create a user choice,
+        user_answer = UserChoice(choice=user_choice, answer_right=True)
+        # add the user answer to the quiz result
+        quiz_result.user_choices.append(user_answer)
+        quiz_result.user_choices.append(UserChoice(choice=quiz.questions[1].choices[1], answer_right=False))
+        # add and commit changes
+        db.session.add(quiz_maker)
+        db.session.add(quiz_taker)
+        db.session.commit()
+        # query all users
+        users = User.query.all()
+        print(users[1].quizzes_results[0])
         return render_template('%s.html' % page, users=users)
-    except TemplateNotFound:
+    except Exception as ex:
+        print(ex)
         abort(404)
 
 
@@ -75,16 +103,24 @@ def signin_page(page):
             if user is None:
                 return 'User does not exist'
             else:
-                return  render_template('%s.html' % 'user_profile', user=user)
+                return redirect(url_for('main.user_profile'))
         else:
             return 'Invalid info has been sent to Flask'
+
+
+@main.route('/user_profile', defaults={'page': 'user_profile'},)
+def user_profile(page):
+    if 'user' in session and session['user']:
+        return render_template('user_profile.html', user=session['user'])
+    else:
+        return redirect(url_for('main.signin_page'))
 
 
 # logout session
 @main.route('/logout', defaults={'page': 'logout'})
 def logout(page):
     # print(session['user'], "before logout")
-    session['user'] = None # {..., 'user' : None}
+    session['user'] = None  # {..., 'user' : None}
     flash("You have been logged out", "success")
     return redirect(url_for('main.index'))
 
@@ -93,11 +129,42 @@ def logout(page):
 @main.route('/available_quizzes', defaults={'page': 'available_quizzes'})
 def available_quizzes(page):
     if 'user' in session and session['user']:
-        return render_template('%s.html' % page, user=session['user'])
+        quizzes = Quiz.query.filter_by(visibility=QuizVisibility.Public).all()
+        return render_template('%s.html' % page, user=session['user'], quizzes=quizzes)
     return redirect(url_for('main.logout'))
 
 
-# Validate data format is correct
+# logout session
+@main.route('/created_quizzes',)
+def created_quizzes():
+    if 'user' in session and (user := session['user']):
+        quizzes = Quiz.query.filter_by(user_email=user.email).all()
+        return render_template('created_quizzes.html', user=session['user'], quizzes=quizzes)
+    return redirect(url_for('main.logout'))
+
+
+# logout session
+@main.route('/create_quiz', methods=['GET', 'POST'])
+def create_quiz():
+    if 'user' in session and (user := session['user']):
+        if request.method == 'GET':
+            # if quiz_id:
+            #     quiz = Quiz.query.filter_by(id=quiz_id)
+            #     return  render_template('create_quiz.html', quiz=quiz)
+            # else:
+            return render_template('create_quiz.html')
+        elif request.method == 'POST':
+            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],limited_time=request.form['limited_time'], visibility=request.form['visibility'])
+            user = User.query.filter_by(email=user.email).first()
+            user.created_quizzes.append(quiz)
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for('main.user_profile'))
+    return redirect(url_for('main.logout'))
+    # return redirect(url_for('main.logout'))`
+
+
+# Validate data format is correct šäguöräñ
 def validate(text, pattern):
     regex = re.compile(pattern, re.I)
     match = regex.match(request.form[text])

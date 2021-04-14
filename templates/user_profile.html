@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Welcome to Quizlet {{user.name}}!</h1>
+  <h3>Hi {{user.name}}, Welcome to Quizlet!</h3>
   <div id="content">
-    <button class="btn btn-danger btn-sm active"  onclick="javascript:window.history.back(-1);return false;">Back</button>
       <div class="mt-2">
-        <a class="btn btn-primary btn-sm active"  href="/available_quizzes">View Available Quizzes</a>
+        <a class="btn btn-primary active"  href="/available_quizzes">View Available Quizzes</a>
       </div>
+      <div class="mt-2">
+        <a class="btn btn-primary active"  href="/created_quizzes">View Created Quizzes</a>
+      </div>
+      <div class="mt-2">
+      <div class="mt-2">
+        <a class="btn btn-primary active"  href="/create_quiz">Create Quizzes</a>
+      </div>
+      <div class="mt-2">
   </div>
 
 {% endblock %}

@@ -7,52 +7,40 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
               integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl"
               crossorigin="anonymous">
-        <style>
-            .container2 {
-                position: relative;
-                padding-bottom: 60px;
-                box-sizing: border-box;
-                min-height: 100vh;
-            }
-        </style>
         <title>{% block title %}{% endblock %}</title>
     {% endblock %}
 </head>
 <body>
 <div class="container">
-
-        <div class="flex-column">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-info fixed-top sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">Quizlet</a>
-            <ul class="navbar-nav">
+    <nav class="navbar navbar-expand-lg navbar-light bg-info fixed-top sticky-top px-2">
+        <a class="navbar-brand" href="/">Quizlet</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+
+
+            {% if 'user' in session %}
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    <a class="nav-link" href="/logout">Logout</a>
                 </li>
-
-
-                {% if 'user' in session %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
-                    <!-- {{session['user']}}
+                <!-- {{session['user']}}
               {{user}}
               {{"1"}} -->
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/signin">Sign In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/signup">Sign up</a>
-                    </li>
-                {% endif %}
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin">Sign In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signup">Sign up</a>
+                </li>
+            {% endif %}
 
-            </ul>
-            <!-- </div> -->
-        </div>
+        </ul>
+        <!-- </div> -->
     </nav>
-            <div class="align-self-stretch">
+            <div>
                 {% block content %}
                 {% endblock %}
             </div>
