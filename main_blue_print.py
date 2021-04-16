@@ -170,7 +170,7 @@ def search_quizzes(keywords):
             # quizzes = Quiz.query.filter(Quiz.title.like(f"{keywords}%")).all()
             # quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
             # quizzes = db.session.query(Quiz).filter(Quiz.title.op('regexp')(".*t.*"))
-            quizzes = Quiz.query.filter(Quiz.title.startswith('Q')).all()
+            quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
             print(len(quizzes))
             return render_template('quizzes.html', user=user, quizzes=quizzes)
         else:
