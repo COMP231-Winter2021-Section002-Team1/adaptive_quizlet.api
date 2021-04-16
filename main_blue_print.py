@@ -161,7 +161,21 @@ def create_quiz():
             db.session.commit()
             return redirect(url_for('main.user_profile'))
     return redirect(url_for('main.logout'))
-    # return redirect(url_for('main.logout'))`
+
+
+@main.route('/search_quizzes/<keywords>')
+def search_quizzes(keywords):
+    if 'user' in session and (user := session['user']):
+        if keywords:
+            # quizzes = Quiz.query.filter(Quiz.title.like(f"{keywords}%")).all()
+            # quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
+            # quizzes = db.session.query(Quiz).filter(Quiz.title.op('regexp')(".*t.*"))
+            quizzes = Quiz.query.filter(Quiz.title.startswith('Q')).all()
+            print(len(quizzes))
+            return render_template('quizzes.html', user=user, quizzes=quizzes)
+        else:
+            return render_template('search_quizzes.html', user=user, quizzes=[])
+    return redirect(url_for('main.logout'))
 
 
 # Validate data format is correct šäguöräñ
