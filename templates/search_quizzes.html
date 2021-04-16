@@ -4,27 +4,29 @@
     <div id="content">
     </div>
     <button class="btn btn-danger active my-2" onclick="javascript:window.history.back(-1);return false;">Back</button>
-    <form>
-        <label class="form-label" for="search_form_input">Search quizzes by title: </label><input class="form-control mb-1" type="text" id="search_form_input"/>
+    <form id="target">
+        <label class="form-label" for="search_form_input">Search quizzes by title: </label><input
+            class="form-control mb-1" type="text" id="search_form_input"/>
+        <button type="submit" class="btn btn-primary">Search</button>
     </form>
     <div id="quizzes"></div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
-    $("#search_form_input").keyup(function(){
-        var text = $(this).val();
-        $.ajax({
-          url: "/search_quizzes/"+text,
-          type: "get",
-          {#data: {jsdata: text},#}
-          success: function(response) {
-              console.log(response);
-            $("#quizzes").html(response);
-          },
-          error: function(xhr) {
-            //Do Something to handle error
-          }
+        $("#target").submit(function (event) {
+            let text = $("#search_form_input").val();
+            $.ajax({
+                url: "/search_quizzes/" + text,
+                type: "get",
+                {#data: {jsdata: text},#}
+                success: function (response) {
+                    $("#quizzes").html(response);
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+            event.preventDefault();
         });
-    });
     </script>
 {% endblock %}
 
