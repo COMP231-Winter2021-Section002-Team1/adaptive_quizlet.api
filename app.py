@@ -118,35 +118,6 @@ def signin_page():
             return 'Invalid info has been sent to Flask'
 
 
-# Show quiz settings page for a quiz
-@app.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
-def quiz_settings_page(quiz_id):
-    quiz = query_db('SELECT * FROM quiz WHERE id = ?',
-                    (quiz_id), one=True)
-    if quiz is None:
-        abort(404)
-
-    if request.method == 'GET':
-        return render_template('quiz/quiz_settings.html',
-                               quiz_id=quiz['id'],
-                               quiz_name=quiz['name'],
-                               quiz_type=quiz['quiz_type'],
-                               quiz_visibility=quiz['visibility'])
-
-    if request.method == 'POST':
-        db = get_db()
-        db.execute('UPDATE quiz SET name=?, quiz_type=?, visibility=? WHERE id=?',
-                   (request.form['quiz_name'],
-                    request.form['quiz_type'],
-                    'TRUE' if 'quiz_visibility' in request.form else 'FALSE',
-                    quiz_id))
-        db.commit()
-
-        quiz = query_db('SELECT * FROM quiz WHERE id = ?',
-                        (quiz_id), one=True)
-        return quiz
-
-
 # Initialize application
 if __name__ == '__main__':
     create_app().run()
