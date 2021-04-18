@@ -18,7 +18,8 @@
             <option>Private</option>
         </select>
         <label for="num_of_questions" class="form-label">Number of Questions</label>
-        <input type="number" name="num_of_questions" class="form-control  mb-1" id="num_of_questions" required min="1" max="{{quiz_max_questions}}"/>
+        <input type="number" name="num_of_questions" class="form-control  mb-1" id="num_of_questions" 
+          required min="1" max="{{quiz_max_questions}}" onkeyup="if (this.value > {{quiz_max_questions}}) this.value = null;"/>
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>

@@ -200,7 +200,8 @@ def edit_quiz(quiz_id):
         quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
                                                         'title': request.form['title'],
                                                         'limited_time': request.form['limited_time'],
-                                                        'visibility': request.form['visibility']})
+                                                        'visibility': request.form['visibility'],
+                                                        'num_of_questions': request.form['num_of_questions']})
         db.session.commit()
         return redirect(url_for('main.user_profile'))
 
