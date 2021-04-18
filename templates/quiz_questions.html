@@ -5,7 +5,9 @@ head %}{{ super() }}{% endblock %} {% block content %}
 
 <form action="/quizzes/{{ quiz_id }}/questions" method="POST">
   <div id="questions"></div>
-  <button type="button" id="add_question" class="btn btn-primary">Add New Question</button>
+  <button type="button" id="add_question" class="btn btn-primary">
+    Add New Question
+  </button>
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
@@ -34,21 +36,16 @@ head %}{{ super() }}{% endblock %} {% block content %}
       numberOfChoices = questionsDiv.children[i - 1].querySelector("ul")
         .children.length;
 
-      for (let j = 0; j < numberOfChoices; j++) {
-        questions[i - 1].choices[j] = document.getElementById(
-          "question_" + i.toString() + "_choice_" + (j + 1).toString()
-        ).value;
+      let checkedElement = document.querySelector(
+        'input[name="' +
+          "question_" +
+          i.toString() +
+          "_correct_choice" +
+          '"]:checked'
+      );
 
-        if (
-          document.getElementById(
-            "question_" +
-              i.toString() +
-              "_choice_" +
-              (j + 1).toString() +
-              "_correct"
-          ).checked
-        )
-          questions[i - 1].correctChoice = j;
+      if (checkedElement) {
+        questions[i - 1].correctChoice = parseInt(checkedElement.value - 1);
       }
     }
   }
@@ -67,6 +64,7 @@ head %}{{ super() }}{% endblock %} {% block content %}
       questionDiv.appendChild(questionHeader);
       let questionText = document.createElement("input");
       questionText.id = "question_" + i.toString() + "_text";
+      questionText.name = questionText.id;
       questionText.value = question.text;
       questionDiv.appendChild(questionText);
 
@@ -79,16 +77,27 @@ head %}{{ super() }}{% endblock %} {% block content %}
 
       let choiceList = document.createElement("ul");
       choiceList.style = "list-style-type: None";
+
+      let correctChoice = question.correctChoice;
+
       for (let j = 1; j <= question.choices.length; j++) {
         let choice = question.choices[j - 1];
 
         let choiceRadio = document.createElement("input");
         choiceRadio.id =
           "question_" + i.toString() + "_choice_" + j.toString() + "_correct";
+        choiceRadio.name = choiceRadio.id;
         choiceRadio.type = "radio";
-        choiceRadio.name = "question_" + i.toString() + "_choices";
+        choiceRadio.name = "question_" + i.toString() + "_correct_choice";
+        choiceRadio.value = j;
         let choiceText = document.createElement("input");
         choiceText.id = "question_" + i.toString() + "_choice_" + j.toString();
+        choiceText.name = choiceText.id;
+
+        if (j - 1 == correctChoice) {
+          choiceRadio.checked = true;
+        }
+
         choiceText.value = choice;
         let choiceElement = document.createElement("li");
         choiceElement.appendChild(choiceRadio);
