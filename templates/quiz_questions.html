@@ -62,18 +62,23 @@ head %}{{ super() }}{% endblock %} {% block content %}
 
       questionHeader.innerText = "Question " + i.toString();
       questionDiv.appendChild(questionHeader);
+
+      let deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "btn btn-primary";
+      deleteButton.innerText = "Delete Question";
+
+      deleteButton.addEventListener("click", deleteQuestion(i - 1));
+      questionDiv.append(deleteButton);
+
+      questionDiv.append(document.createElement("br"));
+      questionDiv.append(document.createElement("br"));
+
       let questionText = document.createElement("input");
       questionText.id = "question_" + i.toString() + "_text";
       questionText.name = questionText.id;
       questionText.value = question.text;
       questionDiv.appendChild(questionText);
-
-      let deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.innerText = "Delete Question";
-
-      deleteButton.addEventListener("click", deleteQuestion(i - 1));
-      questionDiv.append(deleteButton);
 
       let choiceList = document.createElement("ul");
       choiceList.style = "list-style-type: None";
