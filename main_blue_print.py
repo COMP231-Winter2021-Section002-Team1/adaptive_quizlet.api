@@ -15,49 +15,49 @@ main = Blueprint('main', __name__,
 @main.route('/<page>')
 def index(page):
     try:
-        db.drop_all()
-        db.create_all()
+        # db.drop_all()
+        # db.create_all()
         # create quiz maker
-        quiz_maker = User(name='Hassan', email='hassan149367@gmail.com', password='password')
-        # create quiz with single-choice questions
-        quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
-        # create and add question for the quiz
-        question = Question(content="1+1=?", correct_answer=2, choices=[
-            Choice(content="1"),
-            Choice(content="2"),
-            Choice(content="3"),
-            Choice(content="4"),
-        ])
-        quiz.questions.append(question)
-        quiz.questions.append(Question(content="1+2=?", correct_answer=3, choices=[
-            Choice(content="1"),
-            Choice(content="2"),
-            Choice(content="3"),
-            Choice(content="4"),
-        ]))
-        # add created quiz to quiz maker's created quizzes list
-        quiz_maker.created_quizzes.append(quiz)
-
-        # create quiz taker
-        quiz_taker = User(name='guest', email='a@a.a', password='123')
-        # quiz taker take a quiz, create user quiz result
-        quiz_result = QuizResult(quiz=quiz)
-        # add quiz result to the taker
-        quiz_taker.quizzes_results.append(quiz_result)
-        # set quiz taker's answer for question[0] in the quiz, here user choose the second choice which is at index 1
-        user_choice = quiz.questions[0].choices[1]
-        # create a user choice,
-        user_answer = UserChoice(choice=user_choice, answer_right=True)
-        # add the user answer to the quiz result
-        quiz_result.user_choices.append(user_answer)
-        quiz_result.user_choices.append(UserChoice(choice=quiz.questions[1].choices[1], answer_right=False))
-        # add and commit changes
-        db.session.add(quiz_maker)
-        db.session.add(quiz_taker)
-        db.session.commit()
+        # quiz_maker = User(name='Hassan', email='hassan149367@gmail.com', password='password')
+        # # create quiz with single-choice questions
+        # quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
+        # # create and add question for the quiz
+        # question = Question(content="1+1=?", correct_answer=2, choices=[
+        #     Choice(content="1"),
+        #     Choice(content="2"),
+        #     Choice(content="3"),
+        #     Choice(content="4"),
+        # ])
+        # quiz.questions.append(question)
+        # quiz.questions.append(Question(content="1+2=?", correct_answer=3, choices=[
+        #     Choice(content="1"),
+        #     Choice(content="2"),
+        #     Choice(content="3"),
+        #     Choice(content="4"),
+        # ]))
+        # # add created quiz to quiz maker's created quizzes list
+        # quiz_maker.created_quizzes.append(quiz)
+        #
+        # # create quiz taker
+        # quiz_taker = User(name='guest', email='a@a.a', password='123')
+        # # quiz taker take a quiz, create user quiz result
+        # quiz_result = QuizResult(quiz=quiz)
+        # # add quiz result to the taker
+        # quiz_taker.quizzes_results.append(quiz_result)
+        # # set quiz taker's answer for question[0] in the quiz, here user choose the second choice which is at index 1
+        # user_choice = quiz.questions[0].choices[1]
+        # # create a user choice,
+        # user_answer = UserChoice(choice=user_choice, answer_right=True)
+        # # add the user answer to the quiz result
+        # quiz_result.user_choices.append(user_answer)
+        # quiz_result.user_choices.append(UserChoice(choice=quiz.questions[1].choices[1], answer_right=False))
+        # # add and commit changes
+        # db.session.add(quiz_maker)
+        # db.session.add(quiz_taker)
+        # db.session.commit()
         # query all users
         users = User.query.all()
-        print(users[1].quizzes_results[0])
+        # print(users[1].quizzes_results[0])
         return render_template('%s.html' % page, users=users)
     except Exception as ex:
         print(ex)
