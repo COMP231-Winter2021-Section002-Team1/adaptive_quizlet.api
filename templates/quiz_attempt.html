@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block title %}Quiz Settings{% endblock %} {% block
+head %}{{ super() }}{% endblock %} {% block content %}
+
+<h1>{{ quiz_name }}</h1>
+
+<div id="question_selector"></div>
+
+<div id="question" style="list-style: none">
+  <h3 id="question_name"></h3>
+  <h5 id="question_text"></h5>
+  <ul id="choices"></ul>
+</div>
+
+<form method="POST">
+  <div id="answer_form"></div>
+  <input type="submit" />
+</form>
+
+<script>
+  const questions = {{ questions }}
+
+  let selectedNum = null;
+  let questionAnswers = Array(questions.length).fill(null);
+
+  const questionSelector = document.getElementById("question_selector");
+
+  const questionName = document.getElementById("question_name");
+  const questionText = document.getElementById("question_text");
+  const questionChoices = document.getElementById("choices");
+
+  const answerForm = document.getElementById("answer_form");
+
+  function updateQuestionUi() {
+    let question = questions[selectedNum - 1];
+
+    questionName.innerText = "Question " + selectedNum;
+    questionText.innerText = question["text"];
+
+    questionChoices.innerHTML = "";
+
+    for (let j = 1; j <= question.choices.length; j++) {
+      let choiceRadio = document.createElement("input");
+      choiceRadio.type = "radio";
+      choiceRadio.id =
+        "question_" + selectedNum.toString() + "_choice_" + j.toString();
+      choiceRadio.name = "question_" + selectedNum.toString();
+      choiceRadio.addEventListener("click", () => {
+        questionAnswers[selectedNum - 1] = j;
+        updateFormUi();
+      });
+
+      let choiceLabel = document.createElement("label");
+      choiceLabel.for =
+        "question_" + selectedNum.toString() + "_choice_" + j.toString();
+      choiceLabel.innerText = question.choices[j - 1];
+
+      let choiceElement = document.createElement("li");
+      choiceElement.appendChild(choiceRadio);
+      choiceElement.appendChild(choiceLabel);
+
+      questionChoices.appendChild(choiceElement);
+    }
+  }
+
+  function updateFormUi() {
+    answerForm.innerHTML = "";
+
+    for (let i = 1; i <= questions.length; i++) {
+      let questionBox = document.createElement("input");
+      questionBox.style = "display: None";
+      questionBox.type = "number";
+      questionBox.name = "question_" + i.toString() + "_answer";
+      questionBox.value = questionAnswers[i - 1];
+
+      answerForm.appendChild(questionBox);
+    }
+  }
+
+  function updateUi() {
+    if (selectedNum) updateQuestionUi();
+    updateFormUi();
+  }
+
+  const selectQuestionEvent = (i) =>
+    function () {
+      selectedNum = i;
+      updateUi();
+    };
+
+  function createQuestionSelector() {
+    for (let i = 1; i <= questions.length; i++) {
+      let selectButton = document.createElement("button");
+      selectButton.type = "button";
+      selectButton.innerText = i.toString();
+      selectButton.addEventListener("click", selectQuestionEvent(i));
+
+      questionSelector.appendChild(selectButton);
+    }
+  }
+
+  createQuestionSelector();
+</script>
+
+{% endblock %} {% block footer %} {{ super() }}
+<p>This is the footer from the quiz attempt child template</p>
+{% endblock %}
