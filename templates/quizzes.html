@@ -1,0 +1,14 @@
+{% for quiz in quizzes %}
+    <div class="card p-2 mt-2 mb-4 drop-shadow">
+        <div class="d-md-flex flex-md-row justify-content-md-between align-items-md-center">
+            <div>
+                <div>Quiz title: {{ quiz.title }}</div>
+                <div>Number of questions: {{ quiz.questions_count }}</div>
+                <div>Time limit: {{ quiz.limited_time }} min</div>
+                <div>Posted at: {{ quiz.posted_at_string }}</div>
+                <div>Created by: {{ quiz.user.name }}</div>
+            </div>
+            <a class="btn btn-primary">Start Quiz</a>
+        </div>
+    </div>
+{% endfor %}
