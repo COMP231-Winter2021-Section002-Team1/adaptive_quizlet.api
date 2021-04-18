@@ -2,6 +2,7 @@
 from flask import Flask, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from jinja2 import Template
 
 db = SQLAlchemy()
 
@@ -14,6 +15,7 @@ def create_app(test_config=None):
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config.from_object(__name__)
+
     Session(app)
     db.init_app(app)
     from main_blue_print import main

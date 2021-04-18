@@ -2,9 +2,10 @@ import re
 from datetime import datetime
 
 from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
-
+import app.forms as f
 from app import db
 from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
+from copy import copy
 
 main = Blueprint('main', __name__, template_folder='templates')
 
@@ -13,51 +14,49 @@ main = Blueprint('main', __name__, template_folder='templates')
 @main.route('/<page>')
 def index(page):
     try:
-        db.drop_all()
-        db.create_all()
+        # db.drop_all()
+        # db.create_all()
         # create quiz maker
-        quiz_maker = User(
-            name='Hassan', email='hassan149367@gmail.com', password='password')
-        # create quiz with single-choice questions
-        quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
-        # create and add question for the quiz
-        question = Question(content="1+1=?", correct_answer=2, choices=[
-            Choice(content="1"),
-            Choice(content="2"),
-            Choice(content="3"),
-            Choice(content="4"),
-        ])
-        quiz.questions.append(question)
-        quiz.questions.append(Question(content="1+2=?", correct_answer=3, choices=[
-            Choice(content="1"),
-            Choice(content="2"),
-            Choice(content="3"),
-            Choice(content="4"),
-        ]))
-        # add created quiz to quiz maker's created quizzes list
-        quiz_maker.created_quizzes.append(quiz)
-
-        # create quiz taker
-        quiz_taker = User(name='guest', email='a@a.a', password='123')
-        # quiz taker take a quiz, create user quiz result
-        quiz_result = QuizResult(quiz=quiz)
-        # add quiz result to the taker
-        quiz_taker.quizzes_results.append(quiz_result)
-        # set quiz taker's answer for question[0] in the quiz, here user choose the second choice which is at index 1
-        user_choice = quiz.questions[0].choices[1]
-        # create a user choice,
-        user_answer = UserChoice(choice=user_choice, answer_right=True)
-        # add the user answer to the quiz result
-        quiz_result.user_choices.append(user_answer)
-        quiz_result.user_choices.append(UserChoice(
-            choice=quiz.questions[1].choices[1], answer_right=False))
-        # add and commit changes
-        db.session.add(quiz_maker)
-        db.session.add(quiz_taker)
-        db.session.commit()
+        # quiz_maker = User(name='Hassan', email='hassan149367@gmail.com', password='password')
+        # # create quiz with single-choice questions
+        # quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
+        # # create and add question for the quiz
+        # question = Question(content="1+1=?", correct_answer=2, choices=[
+        #     Choice(content="1"),
+        #     Choice(content="2"),
+        #     Choice(content="3"),
+        #     Choice(content="4"),
+        # ])
+        # quiz.questions.append(question)
+        # quiz.questions.append(Question(content="1+2=?", correct_answer=3, choices=[
+        #     Choice(content="1"),
+        #     Choice(content="2"),
+        #     Choice(content="3"),
+        #     Choice(content="4"),
+        # ]))
+        # # add created quiz to quiz maker's created quizzes list
+        # quiz_maker.created_quizzes.append(quiz)
+        #
+        # # create quiz taker
+        # quiz_taker = User(name='guest', email='a@a.a', password='123')
+        # # quiz taker take a quiz, create user quiz result
+        # quiz_result = QuizResult(quiz=quiz)
+        # # add quiz result to the taker
+        # quiz_taker.quizzes_results.append(quiz_result)
+        # # set quiz taker's answer for question[0] in the quiz, here user choose the second choice which is at index 1
+        # user_choice = quiz.questions[0].choices[1]
+        # # create a user choice,
+        # user_answer = UserChoice(choice=user_choice, answer_right=True)
+        # # add the user answer to the quiz result
+        # quiz_result.user_choices.append(user_answer)
+        # quiz_result.user_choices.append(UserChoice(choice=quiz.questions[1].choices[1], answer_right=False))
+        # # add and commit changes
+        # db.session.add(quiz_maker)
+        # db.session.add(quiz_taker)
+        # db.session.commit()
         # query all users
         users = User.query.all()
-        print(users[1].quizzes_results[0])
+        # print(users[1].quizzes_results[0])
         return render_template('%s.html' % page, users=users)
     except Exception as ex:
         print(ex)
@@ -150,6 +149,8 @@ def created_quizzes():
 @main.route('/create_quiz', methods=['GET', 'POST'])
 def create_quiz():
     if 'user' in session and (user := session['user']):
+        form = f.QuizForm(request.form)
+        if request.method == 'POST' and form.validate():
         if request.method == 'GET':
             # if quiz_id:
             #     quiz = Quiz.query.filter_by(id=quiz_id)
@@ -160,11 +161,52 @@ def create_quiz():
             quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],
                         limited_time=request.form['limited_time'], visibility=request.form['visibility'])
             user = User.query.filter_by(email=user.email).first()
+            quiz = Quiz(user=user, limited_time=int(form.limited_time.data), title=form.title.data, access_code=form.access_code.data, visibility=form.visibility.data,
+                        questions=[Question(correct_answer=i['correct_answer'], content=i['content'],
+                                            choices=[Choice(content=c["content"]) for c in i['choices']]) for i in
+                                   form.questions.data])
             user.created_quizzes.append(quiz)
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('main.user_profile'))
+        session['quiz'] = {
+            "title": "",
+            "access_code": "",
+            "limited_time": "",
+            "visibility": "Public",
+            "questions": [],
+        }
+        form = f.QuizForm(data=session["quiz"])
+        return render_template('create_quiz.html', form=form, get_index=get_index, get_index_int=get_index_int)
     return redirect(url_for('main.logout'))
+
+
+def get_index(question):
+    return int(question.name.split('-')[-1]) + 1
+
+
+def get_index_int(question):
+    return int(question.name.split('-')[-1])
+
+
+@main.route('/clear_quiz')
+def clear_quiz():
+    session['quiz'] =  {
+                "title": "",
+                "access_code": "",
+                "limited_time": "",
+                "visibility": "Public",
+                "questions": [],
+            }
+    form = f.QuizForm(data=session["quiz"])
+    return render_template('create_quiz.html', form=form, get_index=get_index, get_index_int=get_index_int)
+
+
+@main.route('/add_question', methods=["PUT"])
+def add_question():
+    form = f.QuizForm(request.form)
+    form.questions.append_entry(copy(f.NEW_QUESTION))
+    return render_template('questions_form.html', form=form, get_index=get_index, get_index_int=get_index_int)
 
 
 @main.route('/search_quizzes/<keywords>')

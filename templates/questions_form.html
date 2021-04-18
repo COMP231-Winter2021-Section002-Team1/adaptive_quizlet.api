@@ -1,0 +1,17 @@
+{% for question in form.questions %}
+    <div class="card m-2">
+    <div class="p-2">
+
+        <label class="form-label">Question {{ get_index(question) }}</label>
+        {{ question.form.content(class_="form-control") }}
+        <label for="correct_answer" class="form-label">Correct Choice</label>
+        {{ question.form.correct_answer(class_="form-control") }}
+        <div>
+            {% for choice in question.form.choices %}
+                <label for="content" class="form-label">Choice {{ get_index(choice) }}</label>
+                {{ choice.form.content(class_="form-control") }}
+            {% endfor %}
+        </div>
+    </div>
+    </div>
+{% endfor %}

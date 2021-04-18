@@ -10,14 +10,12 @@
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
     <div id="quizzes"></div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         $("#target").submit(function (event) {
             let text = $("#search_form_input").val();
             $.ajax({
                 url: "/search_quizzes/" + text,
                 type: "get",
-                {#data: {jsdata: text},#}
                 success: function (response) {
                     $("#quizzes").html(response);
                 },
