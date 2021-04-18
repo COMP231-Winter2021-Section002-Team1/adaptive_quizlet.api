@@ -6,12 +6,12 @@
     <button class="btn btn-danger active my-2" onclick="window.history.back(-1);return false;">Back</button>
     <form action="/quizzes/{{quiz_id}}/settings" method="post">
         <label for="title" class="form-label">Title</label>
-        <input type="text" name="title" class="form-control mb-1" id="title" placeholder={{ quiz_name }} required/>
+        <input type="text" name="title" class="form-control mb-1" id="title" placeholder="{{quiz_name}}"required/>
 
         <label for="access_code" class="form-label">Access Code</label>
-        <input type="text" name="access_code" class="form-control  mb-1" id="access_code" placeholder={{ quiz_access_code }} required/>
+        <input type="text" name="access_code" class="form-control  mb-1" id="access_code" placeholder="{{quiz_access_code}}" required/>
         <label for="limited_time" class="form-label">Limited Time</label>
-        <input type="text" name="limited_time" class="form-control  mb-1" id="limited_time" placeholder={{quiz_limited_time}} required/>
+        <input type="text" name="limited_time" class="form-control  mb-1" id="limited_time" placeholder="{{quiz_limited_time}}" required/>
         <label for="visibility" class="form-label">Visibility</label>
 
         <select class="form-select  mb-1" name="visibility"aria-label="Default select example">

@@ -1,5 +1,5 @@
 # Flask web framework
-from flask import Flask, abort, render_template, request, g
+from flask import Flask, abort, render_template, request, g, redirect
 # Database
 import sqlite3
 # Regular Expressions
@@ -76,8 +76,6 @@ def validate(text, pattern):
     return bool(match)
 
 # Show signup form and process and save returned form data
-
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'GET':
@@ -93,7 +91,7 @@ def signup_page():
                        tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.commit()
 
-            return 'Vaild info has been sent to Flask'
+            return 'Valid info has been sent to Flask'
         else:
             return 'Invalid info has been sent to Flask'
 

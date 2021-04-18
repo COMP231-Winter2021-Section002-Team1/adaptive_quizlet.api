@@ -6,8 +6,7 @@ from flask import Blueprint, abort, render_template, request, redirect, session,
 from app import db
 from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
 
-main = Blueprint('main', __name__,
-                 template_folder='templates')
+main = Blueprint('main', __name__, template_folder='templates')
 
 
 @main.route('/', defaults={'page': 'index'})
@@ -203,6 +202,11 @@ def edit_quiz(quiz_id):
                                                         'visibility': request.form['visibility']})
         db.session.commit()
         return redirect(url_for('main.user_profile'))
+
+@main.route('/quizzes/<quiz_id>/questions', methods=['GET', 'POST'])
+def edit_quiz_questions(quiz_id):
+    return "Edit Quiz Questions"
+
 
 # Validate data format is correct šäguöräñ
 def validate(text, pattern):
