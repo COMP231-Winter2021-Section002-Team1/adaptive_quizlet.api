@@ -2,9 +2,10 @@ import re
 from datetime import datetime
 
 from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
-
+import app.forms as f
 from app import db
 from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
+from copy import copy
 
 main = Blueprint('main', __name__,
                  template_folder='templates')
@@ -36,7 +37,6 @@ def index(page):
         ]))
         # add created quiz to quiz maker's created quizzes list
         quiz_maker.created_quizzes.append(quiz)
-
 
         # create quiz taker
         quiz_taker = User(name='guest', email='a@a.a', password='123')
@@ -108,7 +108,7 @@ def signin_page(page):
             return 'Invalid info has been sent to Flask'
 
 
-@main.route('/user_profile', defaults={'page': 'user_profile'},)
+@main.route('/user_profile', defaults={'page': 'user_profile'}, )
 def user_profile(page):
     if 'user' in session and session['user']:
         return render_template('user_profile.html', user=session['user'])
@@ -135,7 +135,7 @@ def available_quizzes(page):
 
 
 # logout session
-@main.route('/created_quizzes',)
+@main.route('/created_quizzes', )
 def created_quizzes():
     if 'user' in session and (user := session['user']):
         quizzes = Quiz.query.filter_by(user_email=user.email).all()
@@ -147,29 +147,61 @@ def created_quizzes():
 @main.route('/create_quiz', methods=['GET', 'POST'])
 def create_quiz():
     if 'user' in session and (user := session['user']):
-        if request.method == 'GET':
-            # if quiz_id:
-            #     quiz = Quiz.query.filter_by(id=quiz_id)
-            #     return  render_template('create_quiz.html', quiz=quiz)
-            # else:
-            return render_template('create_quiz.html')
-        elif request.method == 'POST':
-            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],limited_time=request.form['limited_time'], visibility=request.form['visibility'])
+        form = f.QuizForm(request.form)
+        if request.method == 'POST' and form.validate():
             user = User.query.filter_by(email=user.email).first()
+            quiz = Quiz(user=user, limited_time=int(form.limited_time.data), title=form.title.data, access_code=form.access_code.data, visibility=form.visibility.data,
+                        questions=[Question(correct_answer=i['correct_answer'], content=i['content'],
+                                            choices=[Choice(content=c["content"]) for c in i['choices']]) for i in
+                                   form.questions.data])
             user.created_quizzes.append(quiz)
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('main.user_profile'))
+        session['quiz'] = {
+            "title": "",
+            "access_code": "",
+            "limited_time": "",
+            "visibility": "Public",
+            "questions": [],
+        }
+        form = f.QuizForm(data=session["quiz"])
+        return render_template('create_quiz.html', form=form, get_index=get_index, get_index_int=get_index_int)
     return redirect(url_for('main.logout'))
+
+
+def get_index(question):
+    return int(question.name.split('-')[-1]) + 1
+
+
+def get_index_int(question):
+    return int(question.name.split('-')[-1])
+
+
+@main.route('/clear_quiz')
+def clear_quiz():
+    session['quiz'] =  {
+                "title": "",
+                "access_code": "",
+                "limited_time": "",
+                "visibility": "Public",
+                "questions": [],
+            }
+    form = f.QuizForm(data=session["quiz"])
+    return render_template('create_quiz.html', form=form, get_index=get_index, get_index_int=get_index_int)
+
+
+@main.route('/add_question', methods=["PUT"])
+def add_question():
+    form = f.QuizForm(request.form)
+    form.questions.append_entry(copy(f.NEW_QUESTION))
+    return render_template('questions_form.html', form=form, get_index=get_index, get_index_int=get_index_int)
 
 
 @main.route('/search_quizzes/<keywords>')
 def search_quizzes(keywords):
     if 'user' in session and (user := session['user']):
         if keywords:
-            # quizzes = Quiz.query.filter(Quiz.title.like(f"{keywords}%")).all()
-            # quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
-            # quizzes = db.session.query(Quiz).filter(Quiz.title.op('regexp')(".*t.*"))
             quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
             print(len(quizzes))
             return render_template('quizzes.html', user=user, quizzes=quizzes)

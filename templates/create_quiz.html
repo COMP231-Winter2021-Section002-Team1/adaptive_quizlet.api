@@ -1,35 +1,59 @@
 {% extends "base.html" %}
+{% block title %}Create Quiz{% endblock %}
 {% block content %}
     <h4>My Quizzes</h4>
     <div id="content">
     </div>
     <button class="btn btn-danger active my-2" onclick="window.history.back(-1);return false;">Back</button>
-    <form action="/create_quiz" method="post">
-        <label for="title" class="form-label">Title</label>
-        <input type="text" name="title" class="form-control mb-1" id="title" required/>
-
-        <label for="access_code" class="form-label">Access Code</label>
-        <input type="text" name="access_code" class="form-control  mb-1" id="access_code" required/>
-        <label for="limited_time" class="form-label">Limited Time</label>
-        <input type="text" name="limited_time" class="form-control  mb-1" id="limited_time" required/>
-        <label for="visibility" class="form-label">Visibility</label>
-        <select class="form-select  mb-1" name="visibility" aria-label="Default select example">
-            <option selected>Public</option>
-            <option>Private</option>
-        </select>
-{#        <h4>Questions</h4>#}
-{#        <div class="mb-3">#}
-{#            <h5>Question 1</h5>#}
-{#            <label for="questions[][content]" class="form-label">Question</label>#}
-{#            <input type="text" class="form-control" name="questions[][content]" id="questions[][content]"/>#}
-{#        </div>#}
-{#        <div class="mb-3">#}
-{#            <h5>Question 2</h5>#}
-{#            <label for="questions[][content]" class="form-label">Question</label>#}
-{#            <input type="text" class="form-control" name="questions[][content]" id="questions[][content]"/>#}
-{#        </div>#}
-
-        <button type="submit" class="btn btn-primary">Submit</button>
+    <div id="form_container">
+        {% from "_formhelpers.html" import render_field %}
+        <form action="/create_quiz" method=post>
+            <label for="title" class="form-label">Title</label>
+            {{ form.title(class_="form-control") }}
+            <label for="access_code" class="form-label">Access Code</label>
+            {{ form.access_code(class_="form-control") }}
+            <label for="limited_time" class="form-label">Limited Time(Minutes)</label>
+            {{ form.limited_time(class_="form-control") }}
+            <label for="visibility" class="form-label">Visibility</label>
+            {{ form.visibility(class_="form-control") }}
+        <div id="questions">
+             {% for question in form.questions %}
+                <div class="m-3">
+                    <label class="form-label">Question {{ get_index(question) }}</label>
+                    {{ question.form.content(class_="form-control") }}
+                    <label for="correct_answer" class="form-label">Correct Answer</label>
+                    {{ question.form.correct_answer(class_="form-control") }}
+                    <div>
+                        {% for choice in question.form.choices %}
+                            <label for="content" class="form-label">Choice {{ get_index(choice) }}</label>
+                            {{ choice.form.content(class_="form-control") }}
+                        {% endfor %}
+                            </div>
+                    </div>
+            {% endfor %}
+        </div>
+            <button  type="button" id="add_question" class="btn btn-primary d-block m-2">Add Question</button>
+            <a href="/create_quiz"  type="button" class="btn btn-danger m-2">Clear Form</a>
+        <input type="submit" class="btn btn-primary m-2" value="Submit"/>
     </form>
+    </div>
+    <script>
+        $("#add_question").click(function (event) {
+            console.log($('form'));
+            $.ajax({
+                url: "/add_question",
+                type: "put",
+                data: $('form').serialize(),
+                success: function (response) {
+                    $("#questions").html(response);
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+            event.preventDefault();
+        });
+
+    </script>
 {% endblock %}
 
