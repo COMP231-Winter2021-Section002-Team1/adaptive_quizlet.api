@@ -195,6 +195,7 @@ def edit_quiz(quiz_id):
                                quiz_access_code=quiz.access_code,
                                quiz_limited_time=quiz.limited_time,
                                quiz_visibility=quiz.visibility,
+                               quiz_num_of_questions=quiz.num_of_questions,
                                quiz_max_questions=len(quiz.questions))
     elif request.method == 'POST':
         quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
@@ -207,7 +208,14 @@ def edit_quiz(quiz_id):
 
 @main.route('/quizzes/<quiz_id>/questions', methods=['GET', 'POST'])
 def edit_quiz_questions(quiz_id):
-    return "Edit Quiz Questions"
+    if not 'user' in session or not session['user']:
+        return redirect(url_for('main.logout'))
+
+    if request.method == 'GET':
+        quiz = Quiz.query.filter_by(id=quiz_id).first()
+        return render_template('quiz_questions.html', quiz_name=quiz.title, quiz_id=quiz.id)
+    # elif request.method == 'POST':
+    # return "Edit Quiz Questions"
 
 
 # Validate data format is correct šäguöräñ

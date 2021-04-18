@@ -5,8 +5,8 @@ head %}{{ super() }}{% endblock %} {% block content %}
 
 <form action="/quizzes/{{ quiz_id }}/questions" method="POST">
   <div id="questions"></div>
-  <button type="button" id="add_question">Add New Question</button>
-  <input type="submit" />
+  <button type="button" id="add_question" class="btn btn-primary">Add New Question</button>
+  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
 <script>
