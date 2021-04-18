@@ -194,7 +194,8 @@ def edit_quiz(quiz_id):
                                quiz_name=quiz.title,
                                quiz_access_code=quiz.access_code,
                                quiz_limited_time=quiz.limited_time,
-                               quiz_visibility=quiz.visibility)
+                               quiz_visibility=quiz.visibility,
+                               quiz_max_questions=len(quiz.questions))
     elif request.method == 'POST':
         quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
                                                         'title': request.form['title'],
