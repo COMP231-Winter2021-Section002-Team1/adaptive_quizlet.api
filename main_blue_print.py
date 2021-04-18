@@ -17,7 +17,8 @@ def index(page):
         db.drop_all()
         db.create_all()
         # create quiz maker
-        quiz_maker = User(name='Hassan', email='hassan149367@gmail.com', password='password')
+        quiz_maker = User(
+            name='Hassan', email='hassan149367@gmail.com', password='password')
         # create quiz with single-choice questions
         quiz = Quiz(title="Quiz 1", limited_time=12, posted_at=datetime.now())
         # create and add question for the quiz
@@ -37,7 +38,6 @@ def index(page):
         # add created quiz to quiz maker's created quizzes list
         quiz_maker.created_quizzes.append(quiz)
 
-
         # create quiz taker
         quiz_taker = User(name='guest', email='a@a.a', password='123')
         # quiz taker take a quiz, create user quiz result
@@ -50,7 +50,8 @@ def index(page):
         user_answer = UserChoice(choice=user_choice, answer_right=True)
         # add the user answer to the quiz result
         quiz_result.user_choices.append(user_answer)
-        quiz_result.user_choices.append(UserChoice(choice=quiz.questions[1].choices[1], answer_right=False))
+        quiz_result.user_choices.append(UserChoice(
+            choice=quiz.questions[1].choices[1], answer_right=False))
         # add and commit changes
         db.session.add(quiz_maker)
         db.session.add(quiz_taker)
@@ -76,8 +77,10 @@ def signup_page(page):
                 and
                 validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
-            print(tuple([request.form[val] for val in ['name', 'email', 'password']]))
-            guest = User.create(tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            print(tuple([request.form[val]
+                         for val in ['name', 'email', 'password']]))
+            guest = User.create(tuple([request.form[val]
+                                       for val in ['name', 'email', 'password']]))
             db.session.add(guest)
             db.session.commit()
             # choice1 = Choice()
@@ -96,9 +99,10 @@ def signin_page(page):
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+')
-                # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
-        ):
-            user = User.query.filter_by(email=request.form['email'], password=request.form['password']).first()
+                    # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+                ):
+            user = User.query.filter_by(
+                email=request.form['email'], password=request.form['password']).first()
             session['user'] = user
             if user is None:
                 return 'User does not exist'
@@ -154,7 +158,8 @@ def create_quiz():
             # else:
             return render_template('create_quiz.html')
         elif request.method == 'POST':
-            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],limited_time=request.form['limited_time'], visibility=request.form['visibility'])
+            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],
+                        limited_time=request.form['limited_time'], visibility=request.form['visibility'])
             user = User.query.filter_by(email=user.email).first()
             user.created_quizzes.append(quiz)
             db.session.add(user)
@@ -177,6 +182,27 @@ def search_quizzes(keywords):
             return render_template('search_quizzes.html', user=user, quizzes=[])
     return redirect(url_for('main.logout'))
 
+
+@main.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
+def edit_quiz(quiz_id):
+    if not 'user' in session or not session['user']:
+        return redirect(url_for('main.logout'))
+
+    if request.method == 'GET':
+        quiz = Quiz.query.filter_by(id=quiz_id).first()
+        return render_template('quiz_settings.html',
+                               quiz_id=quiz.id,
+                               quiz_name=quiz.title,
+                               quiz_access_code=quiz.access_code,
+                               quiz_limited_time=quiz.limited_time,
+                               quiz_visibility=quiz.visibility)
+    elif request.method == 'POST':
+        quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
+                                                        'title': request.form['title'],
+                                                        'limited_time': request.form['limited_time'],
+                                                        'visibility': request.form['visibility']})
+        db.session.commit()
+        return redirect(url_for('main.user_profile'))
 
 # Validate data format is correct šäguöräñ
 def validate(text, pattern):

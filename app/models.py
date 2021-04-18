@@ -7,7 +7,8 @@ from . import db
 class QuizVisibility(enum.Enum):
     Public = "Public"
     Private = "Private"
-
+    def __str__(self):
+        return self.value
 
 class UserChoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)

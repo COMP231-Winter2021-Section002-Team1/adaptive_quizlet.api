@@ -15,7 +15,8 @@
                         <div>Posted at: {{ quiz.posted_at_string }}</div>
                         <div>Created by: {{ quiz.user.name }}</div>
                     </div>
-                    <a class="btn btn-primary" href="/edit_quiz/{{ quiz.id }}">Quiz Setting</a>
+                    <a class="btn btn-primary" href="/quizzes/{{ quiz.id }}/settings">Edit Quiz</a>
+                    <a class="btn btn-primary" href="/edit_quiz/{{ quiz.id }}">Quiz Setting (Probably Useless)</a>
                 </div>
             </div>
         {% endfor %}
