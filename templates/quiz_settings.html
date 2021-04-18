@@ -1,52 +1,40 @@
 {% extends "base.html" %}
-
-
-{% block title %}Sign In{% endblock %}
-{% block head %}{{ super() }}{% endblock %} 
 {% block content %}
+    <h1>Settings: {{ quiz_name }}</h1>
+    <div id="content">
+    </div>
+    <button class="btn btn-danger active my-2" onclick="window.history.back(-1);return false;">Back</button>
+    <form action="/quizzes/{{quiz_id}}/settings" method="post">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" name="title" class="form-control mb-1" id="title" value="{{quiz_name}}" required/>
 
-<h1>Settings: {{ quiz_name }}</h1>
+        <label for="access_code" class="form-label">Access Code</label>
+        <input type="text" name="access_code" class="form-control  mb-1" id="access_code" value="{{quiz_access_code}}" required/>
+        <label for="limited_time" class="form-label">Limited Time</label>
+        <input type="text" name="limited_time" class="form-control  mb-1" id="limited_time" value="{{quiz_limited_time}}" required/>
+        <label for="visibility" class="form-label">Visibility</label>
+        <select class="form-select  mb-1" name="visibility" id="visibility">
+            <option id="public">Public</option>
+            <option id="private">Private</option>
+        </select>
+        <label for="num_of_questions" class="form-label">Number of Questions</label>
+        <input type="number" name="num_of_questions" class="form-control  mb-1" id="num_of_questions" 
+          required min="1" max="{{quiz_max_questions}}" onkeyup="if (this.value > {{quiz_max_questions}}) this.value = null;"/>
 
-<form action="/quizzes/{{ quiz_id }}/settings" method="POST">
-  <ul style="list-style-type: none">
-    <li>
-      <label for="quiz_name">Quiz Name</label>
-      <input id="quiz_name" name="quiz_name" value="{{ quiz_name }}"" />
-    </li>
-    <li>
-      <label for="quiz_type">Quiz Type</label>
-      <select id="quiz_type" name="quiz_type"></select>
-    </li>
-    <li>
-      <input id="quiz_visibility" name="quiz_visibility" type="checkbox" />
-      <label for="quiz_visibility">Public Quiz</label>
-    </li>
-  </ul>
-  <input type="submit" />
-</form>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 
-<script>
-  const quizTypes = [
-    "Challenge",
-    "Check your Understanding",
-    "Research",
-    "Normal",
-  ];
-  let quizTypeSelect = document.getElementById("quiz_type");
+    <script>
+        console.log("{{quiz_visibility}}")
 
-  for (quizType of quizTypes) {
-    let newOption = document.createElement("option");
-    newOption.value = quizType;
-    newOption.innerText = quizType;
-
-    quizTypeSelect.appendChild(newOption);
-  }
-
-  quizTypeSelect.selectedIndex = str(quizTypes.indexOf(quiz_type));
-
-  document.getElementById("quiz_visibility") = quiz_visibility == "TRUE";
-</script>
-
-{% endblock %} {% block footer %} {{ super() }}
-<p>This is the footer from the quiz settings child template</p>
+        if ("{{quiz_visibility}}" == "Public") {
+            console.log("public")
+            document.getElementById("public").setAttribute("selected", "")
+        } 
+        else if ("{{quiz_visibility}}" == "Private") {
+            console.log("private")
+            document.getElementById("private").setAttribute("selected", "")
+        }
+    </script>
 {% endblock %}
+

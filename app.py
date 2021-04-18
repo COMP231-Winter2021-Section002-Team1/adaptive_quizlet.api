@@ -1,5 +1,5 @@
 # Flask web framework
-from flask import Flask, abort, render_template, request, g
+from flask import Flask, abort, render_template, request, g, redirect
 # Database
 import sqlite3
 # Regular Expressions
@@ -76,8 +76,6 @@ def validate(text, pattern):
     return bool(match)
 
 # Show signup form and process and save returned form data
-
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
     if request.method == 'GET':
@@ -93,7 +91,7 @@ def signup_page():
                        tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.commit()
 
-            return 'Vaild info has been sent to Flask'
+            return 'Valid info has been sent to Flask'
         else:
             return 'Invalid info has been sent to Flask'
 
@@ -116,35 +114,6 @@ def signin_page():
                 return user
         else:
             return 'Invalid info has been sent to Flask'
-
-
-# Show quiz settings page for a quiz
-@app.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
-def quiz_settings_page(quiz_id):
-    quiz = query_db('SELECT * FROM quiz WHERE id = ?',
-                    (quiz_id), one=True)
-    if quiz is None:
-        abort(404)
-
-    if request.method == 'GET':
-        return render_template('quiz/quiz_settings.html',
-                               quiz_id=quiz['id'],
-                               quiz_name=quiz['name'],
-                               quiz_type=quiz['quiz_type'],
-                               quiz_visibility=quiz['visibility'])
-
-    if request.method == 'POST':
-        db = get_db()
-        db.execute('UPDATE quiz SET name=?, quiz_type=?, visibility=? WHERE id=?',
-                   (request.form['quiz_name'],
-                    request.form['quiz_type'],
-                    'TRUE' if 'quiz_visibility' in request.form else 'FALSE',
-                    quiz_id))
-        db.commit()
-
-        quiz = query_db('SELECT * FROM quiz WHERE id = ?',
-                        (quiz_id), one=True)
-        return quiz
 
 
 # Initialize application

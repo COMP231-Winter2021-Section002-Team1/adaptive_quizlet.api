@@ -7,8 +7,7 @@ from app import db
 from app.models import User, Question, Quiz, Choice, QuizResult, UserChoice, QuizVisibility
 from copy import copy
 
-main = Blueprint('main', __name__,
-                 template_folder='templates')
+main = Blueprint('main', __name__, template_folder='templates')
 
 
 @main.route('/', defaults={'page': 'index'})
@@ -76,8 +75,10 @@ def signup_page(page):
                 and
                 validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
         ):
-            print(tuple([request.form[val] for val in ['name', 'email', 'password']]))
-            guest = User.create(tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            print(tuple([request.form[val]
+                         for val in ['name', 'email', 'password']]))
+            guest = User.create(tuple([request.form[val]
+                                       for val in ['name', 'email', 'password']]))
             db.session.add(guest)
             db.session.commit()
             # choice1 = Choice()
@@ -96,9 +97,10 @@ def signin_page(page):
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+')
-                # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
-        ):
-            user = User.query.filter_by(email=request.form['email'], password=request.form['password']).first()
+                    # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+                ):
+            user = User.query.filter_by(
+                email=request.form['email'], password=request.form['password']).first()
             session['user'] = user
             if user is None:
                 return 'User does not exist'
@@ -108,7 +110,7 @@ def signin_page(page):
             return 'Invalid info has been sent to Flask'
 
 
-@main.route('/user_profile', defaults={'page': 'user_profile'}, )
+@main.route('/user_profile', defaults={'page': 'user_profile'},)
 def user_profile(page):
     if 'user' in session and session['user']:
         return render_template('user_profile.html', user=session['user'])
@@ -135,7 +137,7 @@ def available_quizzes(page):
 
 
 # logout session
-@main.route('/created_quizzes', )
+@main.route('/created_quizzes',)
 def created_quizzes():
     if 'user' in session and (user := session['user']):
         quizzes = Quiz.query.filter_by(user_email=user.email).all()
@@ -149,6 +151,15 @@ def create_quiz():
     if 'user' in session and (user := session['user']):
         form = f.QuizForm(request.form)
         if request.method == 'POST' and form.validate():
+        if request.method == 'GET':
+            # if quiz_id:
+            #     quiz = Quiz.query.filter_by(id=quiz_id)
+            #     return  render_template('create_quiz.html', quiz=quiz)
+            # else:
+            return render_template('create_quiz.html')
+        elif request.method == 'POST':
+            quiz = Quiz(title=request.form['title'], access_code=request.form['access_code'],
+                        limited_time=request.form['limited_time'], visibility=request.form['visibility'])
             user = User.query.filter_by(email=user.email).first()
             quiz = Quiz(user=user, limited_time=int(form.limited_time.data), title=form.title.data, access_code=form.access_code.data, visibility=form.visibility.data,
                         questions=[Question(correct_answer=i['correct_answer'], content=i['content'],
@@ -202,12 +213,51 @@ def add_question():
 def search_quizzes(keywords):
     if 'user' in session and (user := session['user']):
         if keywords:
+            # quizzes = Quiz.query.filter(Quiz.title.like(f"{keywords}%")).all()
+            # quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
+            # quizzes = db.session.query(Quiz).filter(Quiz.title.op('regexp')(".*t.*"))
             quizzes = Quiz.query.filter(Quiz.title.startswith(keywords)).all()
             print(len(quizzes))
             return render_template('quizzes.html', user=user, quizzes=quizzes)
         else:
             return render_template('search_quizzes.html', user=user, quizzes=[])
     return redirect(url_for('main.logout'))
+
+
+@main.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
+def edit_quiz(quiz_id):
+    if not 'user' in session or not session['user']:
+        return redirect(url_for('main.logout'))
+
+    if request.method == 'GET':
+        quiz = Quiz.query.filter_by(id=quiz_id).first()
+        return render_template('quiz_settings.html',
+                               quiz_id=quiz.id,
+                               quiz_name=quiz.title,
+                               quiz_access_code=quiz.access_code,
+                               quiz_limited_time=quiz.limited_time,
+                               quiz_visibility=quiz.visibility,
+                               quiz_num_of_questions=quiz.num_of_questions,
+                               quiz_max_questions=len(quiz.questions))
+    elif request.method == 'POST':
+        quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
+                                                        'title': request.form['title'],
+                                                        'limited_time': request.form['limited_time'],
+                                                        'visibility': request.form['visibility'],
+                                                        'num_of_questions': request.form['num_of_questions']})
+        db.session.commit()
+        return redirect(url_for('main.user_profile'))
+
+@main.route('/quizzes/<quiz_id>/questions', methods=['GET', 'POST'])
+def edit_quiz_questions(quiz_id):
+    if not 'user' in session or not session['user']:
+        return redirect(url_for('main.logout'))
+
+    if request.method == 'GET':
+        quiz = Quiz.query.filter_by(id=quiz_id).first()
+        return render_template('quiz_questions.html', quiz_name=quiz.title, quiz_id=quiz.id)
+    # elif request.method == 'POST':
+    # return "Edit Quiz Questions"
 
 
 # Validate data format is correct šäguöräñ
