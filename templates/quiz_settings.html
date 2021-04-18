@@ -13,9 +13,9 @@
         <label for="limited_time" class="form-label">Limited Time</label>
         <input type="text" name="limited_time" class="form-control  mb-1" id="limited_time" value="{{quiz_limited_time}}" required/>
         <label for="visibility" class="form-label">Visibility</label>
-        <select class="form-select  mb-1" name="visibility">
-            <option selected>Public</option>
-            <option>Private</option>
+        <select class="form-select  mb-1" name="visibility" id="visibility">
+            <option id="public">Public</option>
+            <option id="private">Private</option>
         </select>
         <label for="num_of_questions" class="form-label">Number of Questions</label>
         <input type="number" name="num_of_questions" class="form-control  mb-1" id="num_of_questions" 
@@ -23,5 +23,18 @@
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+
+    <script>
+        console.log("{{quiz_visibility}}")
+
+        if ("{{quiz_visibility}}" == "Public") {
+            console.log("public")
+            document.getElementById("public").setAttribute("selected", "")
+        } 
+        else if ("{{quiz_visibility}}" == "Private") {
+            console.log("private")
+            document.getElementById("private").setAttribute("selected", "")
+        }
+    </script>
 {% endblock %}
 
