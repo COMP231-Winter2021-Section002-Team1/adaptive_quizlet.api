@@ -6,8 +6,11 @@
     </div>
     <button class="btn btn-danger active my-2" onclick="window.history.back(-1);return false;">Back</button>
     <div id="form_container">
-        {% from "_formhelpers.html" import render_field %}
+    {% if is_editing %}
+        <form action="/quizzes/{{ quiz.id }}/settings" method=post>
+    {% else %}
         <form action="/create_quiz" method=post>
+    {% endif %}
             <label for="title" class="form-label">Title</label>
             {{ form.title(class_="form-control") }}
             <label for="access_code" class="form-label">Access Code</label>
