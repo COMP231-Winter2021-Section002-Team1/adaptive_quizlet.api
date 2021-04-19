@@ -1,4 +1,5 @@
 import re
+import json
 from datetime import datetime
 
 from flask import Blueprint, abort, render_template, request, redirect, session, url_for, flash
@@ -133,6 +134,7 @@ def available_quizzes(page):
     if 'user' in session and session['user']:
         quizzes = Quiz.query.filter_by(visibility=QuizVisibility.Public).all()
         return render_template('%s.html' % page, user=session['user'], quizzes=quizzes)
+
     return redirect(url_for('main.logout'))
 
 
@@ -250,6 +252,46 @@ def edit_quiz_questions(quiz_id):
     # elif request.method == 'POST':
     # return "Edit Quiz Questions"
 
+
+@main.route('/quizzes/<quiz_id>/attempt', methods=['GET', 'POST'])
+def attempt_quiz(quiz_id):
+    if not 'user' in session or not session['user']:
+        return redirect(url_for('main.logout'))
+
+    if request.method == 'GET':
+        questions = Question.query.filter_by(quiz_id=quiz_id).all()
+        
+        questions_json = [{'text': question.content,
+                           'question_id': question.id} for
+                          question in questions]
+
+        for question, question_json in zip(questions, questions_json):
+            question_id = question.id
+            choices = Choice.query.filter_by(question_id=question_id)
+            question_json['choices'] = [{'content': choice.content,
+                                         'choice_id': choice.id} for choice in choices]
+
+        questions_json = json.dumps(questions_json, sort_keys=True)
+
+        return render_template('quiz_attempt.html', questions = questions_json)
+    elif request.method == 'POST':    
+        user = session['user']
+        quiz = Quiz.query.filter_by(id=quiz_id).first()
+        quiz_result = QuizResult(user_email = user.email, quiz_id = quiz_id, user_choices = [])
+
+        f = request.form
+        for key in f.keys():
+            if key.startswith('question_'):
+                choice_id = f[key]
+                choice = Choice.query.filter_by(id=choice_id).first()
+                quiz_result.user_choices.append(
+                    UserChoice(choice_id=choice_id, answer_right=False)
+                )
+
+        db.session.add(quiz_result)
+        db.session.commit()
+
+        return 'Attempt submitted'
 
 # Validate data format is correct šäguöräñ
 def validate(text, pattern):

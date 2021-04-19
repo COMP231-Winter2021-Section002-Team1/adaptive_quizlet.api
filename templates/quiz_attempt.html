@@ -11,13 +11,13 @@ head %}{{ super() }}{% endblock %} {% block content %}
   <ul id="choices"></ul>
 </div>
 
-<form method="POST">
+<form action="" method="POST">
   <div id="answer_form"></div>
   <input type="submit" />
 </form>
 
 <script>
-  const questions = {{ questions }}
+  const questions = {{ questions|safe }}
 
   let selectedNum = null;
   let questionAnswers = Array(questions.length).fill(null);
@@ -45,14 +45,14 @@ head %}{{ super() }}{% endblock %} {% block content %}
         "question_" + selectedNum.toString() + "_choice_" + j.toString();
       choiceRadio.name = "question_" + selectedNum.toString();
       choiceRadio.addEventListener("click", () => {
-        questionAnswers[selectedNum - 1] = j;
+        questionAnswers[selectedNum - 1] = question.choices[j - 1].choice_id;
         updateFormUi();
       });
 
       let choiceLabel = document.createElement("label");
       choiceLabel.for =
         "question_" + selectedNum.toString() + "_choice_" + j.toString();
-      choiceLabel.innerText = question.choices[j - 1];
+      choiceLabel.innerText = question.choices[j - 1].content;
 
       let choiceElement = document.createElement("li");
       choiceElement.appendChild(choiceRadio);
@@ -69,7 +69,8 @@ head %}{{ super() }}{% endblock %} {% block content %}
       let questionBox = document.createElement("input");
       questionBox.style = "display: None";
       questionBox.type = "number";
-      questionBox.name = "question_" + i.toString() + "_answer";
+      questionBox.id = "question_" + i + "_answer";
+      questionBox.name = "question_" + i + "_answer";
       questionBox.value = questionAnswers[i - 1];
 
       answerForm.appendChild(questionBox);
