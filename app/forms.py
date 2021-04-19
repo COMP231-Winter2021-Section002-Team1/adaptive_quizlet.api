@@ -41,3 +41,4 @@ NEW_QUIZ = {
     ],
 }
 EDITING_QUIZ: dict = {}
+

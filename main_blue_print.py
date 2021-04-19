@@ -97,8 +97,8 @@ def signin_page(page):
 
     elif request.method == 'POST':
         if (validate('email', '.+\@.+\..+')
-                    # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
-                ):
+                # and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+        ):
             user = User.query.filter_by(
                 email=request.form['email'], password=request.form['password']).first()
             session['user'] = user
@@ -110,7 +110,7 @@ def signin_page(page):
             return 'Invalid info has been sent to Flask'
 
 
-@main.route('/user_profile', defaults={'page': 'user_profile'},)
+@main.route('/user_profile', defaults={'page': 'user_profile'}, )
 def user_profile(page):
     if 'user' in session and session['user']:
         return render_template('user_profile.html', user=session['user'])
@@ -137,7 +137,7 @@ def available_quizzes(page):
 
 
 # logout session
-@main.route('/created_quizzes',)
+@main.route('/created_quizzes', )
 def created_quizzes():
     if 'user' in session and (user := session['user']):
         quizzes = Quiz.query.filter_by(user_email=user.email).all()
@@ -152,7 +152,8 @@ def create_quiz():
         form = f.QuizForm(request.form)
         if request.method == 'POST' and form.validate():
             user = User.query.filter_by(email=user.email).first()
-            quiz = Quiz(user=user, limited_time=int(form.limited_time.data), title=form.title.data, access_code=form.access_code.data, visibility=form.visibility.data,
+            quiz = Quiz(user=user, limited_time=int(form.limited_time.data), title=form.title.data,
+                        access_code=form.access_code.data, visibility=form.visibility.data,
                         questions=[Question(correct_answer=i['correct_answer'], content=i['content'],
                                             choices=[Choice(content=c["content"]) for c in i['choices']]) for i in
                                    form.questions.data])
@@ -182,13 +183,13 @@ def get_index_int(question):
 
 @main.route('/clear_quiz')
 def clear_quiz():
-    session['quiz'] =  {
-                "title": "",
-                "access_code": "",
-                "limited_time": "",
-                "visibility": "Public",
-                "questions": [],
-            }
+    session['quiz'] = {
+        "title": "",
+        "access_code": "",
+        "limited_time": "",
+        "visibility": "Public",
+        "questions": [],
+    }
     form = f.QuizForm(data=session["quiz"])
     return render_template('create_quiz.html', form=form, get_index=get_index, get_index_int=get_index_int)
 
@@ -217,27 +218,53 @@ def search_quizzes(keywords):
 
 @main.route('/quizzes/<quiz_id>/settings', methods=['GET', 'POST'])
 def edit_quiz(quiz_id):
-    if not 'user' in session or not session['user']:
-        return redirect(url_for('main.logout'))
-
-    if request.method == 'GET':
+    if 'user' in session and (user := session['user']):
         quiz = Quiz.query.filter_by(id=quiz_id).first()
-        return render_template('quiz_settings.html',
-                               quiz_id=quiz.id,
-                               quiz_name=quiz.title,
-                               quiz_access_code=quiz.access_code,
-                               quiz_limited_time=quiz.limited_time,
-                               quiz_visibility=quiz.visibility,
-                               quiz_num_of_questions=quiz.num_of_questions,
-                               quiz_max_questions=len(quiz.questions))
-    elif request.method == 'POST':
-        quiz = Quiz.query.filter_by(id=quiz_id).update({'access_code': request.form['access_code'],
-                                                        'title': request.form['title'],
-                                                        'limited_time': request.form['limited_time'],
-                                                        'visibility': request.form['visibility'],
-                                                        'num_of_questions': request.form['num_of_questions']})
-        db.session.commit()
-        return redirect(url_for('main.user_profile'))
+        form = f.QuizForm(request.form)
+        if request.method == 'POST':
+            user = User.query.filter_by(email=user.email).first()
+            quiz.id = quiz.id
+            quiz.title = form.title.data
+            quiz.access_code = form.access_code.data
+            quiz.visibility = form.visibility.data
+            quiz.limited_time = int(form.limited_time.data)
+            for i, question in enumerate(quiz.questions):
+                try:
+                    question.content = form.questions.data[i]['content']
+                    question.correct_answer = form.questions.data[i]['correct_answer']
+                    for ci, choice in enumerate(question.choices):
+                        try:
+                            choice.content = form.questions.data[i]['choices'][ci]['content']
+                        except:
+                            db.session.delete(choice)
+                except:
+                    db.session.delete(question)
+            if len(quiz.questions) < len(form.questions.data):
+                start = len(form.questions.data) - len(quiz.questions)
+                for i in range(start, len(form.questions.data)):
+                    quiz.questions.append(Question(
+                        content=form.questions.data[i]['content'],
+                        correct_answer=form.questions.data[i]['correct_answer'],
+                        choices=[
+                            Choice(content=c['content']) for c in form.questions.data[i]['choices']
+                        ]
+                    ))
+            db.session.add(quiz)
+
+            db.session.commit()
+            return redirect(url_for('main.user_profile'))
+        session["quiz"] = {
+            "title": quiz.title,
+            "access_code": quiz.access_code,
+            "visibility": quiz.visibility,
+            "questions": quiz.questions_dict,
+            "limited_time": quiz.limited_time,
+        }
+        form = f.QuizForm(data=session["quiz"])
+        return render_template('create_quiz.html', quiz=quiz, form=form, get_index=get_index,
+                               get_index_int=get_index_int, is_editing=True)
+    return redirect(url_for('main.logout'))
+
 
 @main.route('/quizzes/<quiz_id>/questions', methods=['GET', 'POST'])
 def edit_quiz_questions(quiz_id):

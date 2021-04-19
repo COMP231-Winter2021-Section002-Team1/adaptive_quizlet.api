@@ -7,13 +7,15 @@ from . import db
 class QuizVisibility(enum.Enum):
     Public = "Public"
     Private = "Private"
+
     def __str__(self):
         return self.value
+
 
 class UserChoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # user_email = db.Column(db.String(120), db.ForeignKey('take_quiz_history.user_email'), primary_key=True),
-    quiz_result_id = db.Column( db.Integer, db.ForeignKey('quiz_result.id'))
+    quiz_result_id = db.Column(db.Integer, db.ForeignKey('quiz_result.id'))
     choice_id = db.Column(db.Integer, db.ForeignKey('choice.id'))
     answer_right = db.Column(db.Boolean, nullable=False)
 
@@ -24,6 +26,7 @@ class User(db.Model):
     password = db.Column(db.String(20), nullable=False)
     created_quizzes = db.relationship("Quiz", backref='user', lazy=True)
     quizzes_results = db.relationship("QuizResult", backref='user', lazy=True)
+
     @staticmethod
     def create(args):
         return User(name=args[0], email=args[1], password=args[2])
@@ -52,7 +55,7 @@ class QuizResult(db.Model):
     user_choices = db.relationship("UserChoice", backref='quiz_result', lazy=True)
 
     def __str__(self):
-        return f"{self.quiz.title} quiz result is {len([x for x in self.user_choices if x.answer_right])/len(self.user_choices)*100}%."
+        return f"{self.quiz.title} quiz result is {len([x for x in self.user_choices if x.answer_right]) / len(self.user_choices) * 100}%."
 
 
 class Quiz(db.Model):
@@ -64,7 +67,7 @@ class Quiz(db.Model):
     questions = db.relationship("Question", backref='quiz', lazy=True)
     num_of_questions = db.Column(db.Integer, default=0)
     visibility = db.Column(db.Enum(QuizVisibility), default=QuizVisibility.Public)
-    user_email = db.Column(db.String(120),  db.ForeignKey('user.email'),)
+    user_email = db.Column(db.String(120), db.ForeignKey('user.email'), )
     quiz_results = db.relationship("QuizResult", backref='quiz', lazy=False)
 
     @property
@@ -75,6 +78,24 @@ class Quiz(db.Model):
     def questions_count(self):
         return len(self.questions)
 
+    @property
+    def questions_dict(self):
+        return [
+            {
+                "content": i.content,
+                "correct_answer": i.correct_answer,
+                "choices": [
+                    {
+                        "content": i.choices[0].content
+                    }, {
+                        "content": i.choices[1].content
+                    }, {
+                        "content": i.choices[2].content
+                    }
+                ]
+            }
+            for i in self.questions
+        ] if self.questions else {}
 
     def __repr__(self):
         return '<Post %r>' % self.title
